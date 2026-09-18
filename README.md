@@ -4,3 +4,7 @@ A regional event equipment rental company supplies sound systems, lighting, and 
 
 ### Sprint-02  Team-02
 
+### S-130
+- Nirvan Jain
+- Aman Singh
+- Devishree Prakash
