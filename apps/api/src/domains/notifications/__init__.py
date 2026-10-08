@@ -1,0 +1,1 @@
+# Initialization for notifications module
