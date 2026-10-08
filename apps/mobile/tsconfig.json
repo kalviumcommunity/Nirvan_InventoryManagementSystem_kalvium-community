@@ -1,3 +1,6 @@
 {
-  "_comment": "TypeScript configuration for mobile app"
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true
+  }
 }
