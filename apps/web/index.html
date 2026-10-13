@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Rentory - Inventory Management</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- DASHBOARD PAGE -->
+    <div id="dashboard-page" class="page active">
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <div class="status-icons">
+          <i class="ph-fill ph-cell-signal-full"></i>
+          <i class="ph-fill ph-wifi-high"></i>
+          <i class="ph-fill ph-battery-full"></i>
+        </div>
+      </div>
+      
+      <header class="header">
+         <div class="logo">
+           <div class="logo-icon">
+             <i class="ph ph-stack"></i>
+           </div>
+           <h2>Rentory</h2>
+         </div>
+         <div class="header-actions">
+           <button class="icon-btn"><i class="ph ph-magnifying-glass"></i></button>
+           <div class="avatar">S</div>
+         </div>
+      </header>
+
+      <div class="content-scroll">
+        <div class="greeting-section">
+          <p class="date">Monday, 20 Sep</p>
+          <h1>Good morning, Sarah</h1>
+        </div>
+
+        <div class="stats-overview card">
+          <div class="stat">
+            <span class="stat-value">65</span>
+            <span class="stat-label">TOTAL</span>
+          </div>
+          <div class="divider"></div>
+          <div class="stat">
+            <span class="stat-value">42</span>
+            <span class="stat-label">AVAILABLE</span>
+          </div>
+          <div class="divider"></div>
+          <div class="stat">
+            <span class="stat-value">23</span>
+            <span class="stat-label">RENTED</span>
+          </div>
+        </div>
+
+        <div class="section-header mt-6">
+          <h3 class="section-title">UPCOMING RETURN</h3>
+          <span class="badge">1 Due Today</span>
+        </div>
+        
+        <div class="upcoming-card card mt-3">
+          <div class="upcoming-icon">
+            <i class="ph ph-calendar-check"></i>
+          </div>
+          <div class="upcoming-info">
+            <h4>Sharma Wedding</h4>
+            <p>4 Speakers &bull; <span class="due-time">Due 6:00 PM today</span></p>
+          </div>
+          <button class="next-btn"><i class="ph ph-caret-right"></i></button>
+        </div>
+
+        <div class="quick-inventory card mt-6">
+          <div class="card-header">
+            <div>
+              <h3>Quick Inventory Status</h3>
+              <p class="subtitle">Real-time availability balance</p>
+            </div>
+            <a href="#" class="view-all">View All <i class="ph ph-caret-right"></i></a>
+          </div>
+
+          <div class="inventory-item">
+            <div class="item-header">
+              <span class="item-name"><i class="ph ph-speaker-hifi"></i> Speakers</span>
+              <span class="item-count"><strong>10</strong> of 20 available</span>
+            </div>
+            <div class="progress-bar-container"><div class="progress" style="width: 50%"></div></div>
+          </div>
+          
+          <div class="inventory-item">
+            <div class="item-header">
+              <span class="item-name"><i class="ph ph-microphone"></i> Microphones</span>
+              <span class="item-count"><strong>12</strong> of 15 available</span>
+            </div>
+            <div class="progress-bar-container"><div class="progress" style="width: 80%"></div></div>
+          </div>
+
+          <div class="inventory-item">
+            <div class="item-header">
+              <span class="item-name"><i class="ph ph-lightbulb"></i> Stage Lights</span>
+              <span class="item-count"><strong>20</strong> of 30 available</span>
+            </div>
+            <div class="progress-bar-container"><div class="progress" style="width: 66%"></div></div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="fab-container">
+        <button class="fab">
+          <i class="ph ph-plus"></i> New Rental
+        </button>
+      </div>
+    </div>
+
+    <!-- INVENTORY PAGE -->
+    <div id="inventory-page" class="page">
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <div class="status-icons">
+          <i class="ph-fill ph-cell-signal-full"></i>
+          <i class="ph-fill ph-wifi-high"></i>
+          <i class="ph-fill ph-battery-full"></i>
+        </div>
+      </div>
+
+      <header class="header">
+         <h2 class="page-title">Inventory</h2>
+         <button class="icon-btn-light"><i class="ph ph-qr-code"></i></button>
+      </header>
+
+      <div class="content-scroll">
+        <div class="search-bar">
+          <i class="ph ph-magnifying-glass"></i>
+          <input type="text" placeholder="Search equipment...">
+        </div>
+
+        <div class="inventory-stats mt-4">
+          <div class="stat-card">
+            <span class="stat-label">AVAILABLE</span>
+            <span class="stat-value large">42</span>
+            <div class="progress-bar-container thick"><div class="progress" style="width: 65%"></div></div>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">RENTED</span>
+            <span class="stat-value large">23</span>
+            <div class="progress-bar-container thick"><div class="progress" style="width: 35%"></div></div>
+          </div>
+        </div>
+
+        <div class="filter-tabs mt-6">
+          <button class="filter-tab active">All</button>
+          <button class="filter-tab">Audio</button>
+          <button class="filter-tab">Lighting</button>
+        </div>
+
+        <div class="inventory-list mt-4">
+          <!-- Item 1 -->
+          <div class="list-card card">
+            <img src="speaker.png" alt="Speaker" class="item-img">
+            <div class="item-details">
+              <div class="item-title-row">
+                <h4>JBL EON 15" Speakers</h4>
+                <span class="item-stock"><strong>10</strong> / 20 Avail</span>
+              </div>
+              <div class="progress-bar-container"><div class="progress" style="width: 50%"></div></div>
+            </div>
+          </div>
+          <!-- Item 2 -->
+          <div class="list-card card">
+            <img src="microphone.png" alt="Microphone" class="item-img">
+            <div class="item-details">
+              <div class="item-title-row">
+                <h4>Wireless Microphones (Shure)</h4>
+                <span class="item-stock"><strong>12</strong> / 15 Avail</span>
+              </div>
+              <div class="progress-bar-container"><div class="progress" style="width: 80%"></div></div>
+            </div>
+          </div>
+          <!-- Item 3 -->
+          <div class="list-card card">
+            <img src="lights.png" alt="Lights" class="item-img">
+            <div class="item-details">
+              <div class="item-title-row">
+                <h4>Stage Lights (RGBW DMX)</h4>
+                <span class="item-stock"><strong>20</strong> / 30 Avail</span>
+              </div>
+              <div class="progress-bar-container"><div class="progress" style="width: 66%"></div></div>
+            </div>
+          </div>
+          <!-- Item 4 -->
+          <div class="list-card card">
+            <img src="fog.png" alt="Fog Machine" class="item-img">
+            <div class="item-details">
+              <div class="item-title-row">
+                <h4>Fog & FX Machines</h4>
+                <span class="item-stock"><strong>5</strong> / 8 Avail</span>
+              </div>
+              <div class="progress-bar-container"><div class="progress" style="width: 62.5%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="fab-container">
+        <button class="fab">
+          <i class="ph ph-plus"></i> Add Equipment
+        </button>
+      </div>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+      <a href="#" class="nav-item active" data-target="dashboard-page">
+        <i class="ph-fill ph-squares-four"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="#" class="nav-item" data-target="inventory-page">
+        <i class="ph ph-archive-box"></i>
+        <span>Inventory</span>
+      </a>
+      <a href="#" class="nav-item">
+        <i class="ph ph-calendar-blank"></i>
+        <span>Rentals</span>
+      </a>
+      <a href="#" class="nav-item">
+        <i class="ph ph-gear"></i>
+        <span>Settings</span>
+      </a>
+      <div class="home-indicator"></div>
+    </nav>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
