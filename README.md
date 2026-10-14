@@ -182,4 +182,5 @@ alembic upgrade head
 ## 👥 Authors & Community
 
 - Built as part of the **Kalvium Community** project initiative.
-- Maintained by [Nirvan Jain](https://github.com/kalviumcommunity/Nirvan_InventoryManagementSystem_kalvium-community).
+- Maintained by [Nirvan Jain](https://github.com/NirvanJain).
+- [Aman Singh](https://github.com/aman-singh-12).
