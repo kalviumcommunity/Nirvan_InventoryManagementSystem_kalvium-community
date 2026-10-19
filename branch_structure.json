@@ -1,0 +1,18 @@
+{
+  "default_branch": "main",
+  "branches": [
+    "main",
+    "origin",
+    "updated-the-dashboard"
+  ],
+  "parent": {
+    "main": null,
+    "origin": "main",
+    "updated-the-dashboard": "main"
+  },
+  "order": [
+    "main",
+    "origin",
+    "updated-the-dashboard"
+  ]
+}
