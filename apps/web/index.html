@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Rentory - Inventory Management</title>
+  <title>Rentory - Inventory & Rental Management</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,10 +12,474 @@
 </head>
 <body>
   <div class="app-container">
-    <!-- DASHBOARD PAGE -->
-    <div id="dashboard-page" class="page active">
+
+    <!-- 1) INVENTORY PAGE (Screen 1 / Html -> Body) -->
+    <div id="inventory-page" class="page active">
+      <div class="status-bar">
+        <span class="time" id="status-time-inv">9:41</span>
+        <div class="notch-pill"></div>
+        <div class="status-icons">
+          <i class="ph-fill ph-cell-signal-full"></i>
+          <i class="ph-fill ph-wifi-high"></i>
+          <i class="ph-fill ph-battery-full"></i>
+        </div>
+      </div>
+
+      <header class="header">
+        <h2 class="page-title">Inventory</h2>
+        <button class="icon-btn-light" id="btn-scan-qr" title="Scan QR Code"><i class="ph ph-qr-code"></i></button>
+      </header>
+
+      <div class="content-scroll">
+        <div class="search-bar">
+          <i class="ph ph-magnifying-glass"></i>
+          <input type="text" id="inventory-search" placeholder="Search equipment...">
+        </div>
+
+        <div class="inventory-stats mt-4">
+          <div class="stat-card">
+            <span class="stat-label">AVAILABLE</span>
+            <span class="stat-value large" id="inv-stat-avail">42</span>
+            <div class="progress-bar-container thick"><div class="progress" id="inv-bar-avail" style="width: 65%"></div></div>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">RENTED</span>
+            <span class="stat-value large" id="inv-stat-rented">23</span>
+            <div class="progress-bar-container thick"><div class="progress" id="inv-bar-rented" style="width: 35%"></div></div>
+          </div>
+        </div>
+
+        <div class="filter-tabs mt-4" id="inventory-filter-tabs">
+          <button class="filter-tab active" data-category="all">All</button>
+          <button class="filter-tab" data-category="audio">Audio</button>
+          <button class="filter-tab" data-category="lighting">Lighting</button>
+          <button class="filter-tab" data-category="effects">Effects</button>
+        </div>
+
+        <!-- DYNAMICALLY RENDERED INVENTORY LIST -->
+        <div class="inventory-list mt-4" id="inventory-list-container">
+          <!-- Rendered by script.js -->
+        </div>
+      </div>
+      
+      <div class="fab-container">
+        <button class="fab" id="btn-add-equipment">
+          <i class="ph ph-plus"></i> Add Equipment
+        </button>
+      </div>
+    </div>
+
+    <!-- 2) SETTINGS PAGE (Screen 8 / 8) Settings Clean) -->
+    <div id="settings-page" class="page">
+      <div class="status-bar">
+        <span class="time" id="status-time-settings">9:41</span>
+        <div class="notch-pill"></div>
+        <div class="status-icons">
+          <i class="ph-fill ph-cell-signal-full"></i>
+          <i class="ph-fill ph-wifi-high"></i>
+          <i class="ph-fill ph-battery-full"></i>
+        </div>
+      </div>
+
+      <header class="header">
+        <h2 class="page-title">Settings</h2>
+        <button class="icon-btn-light" id="btn-settings-action" title="Quick Info"><i class="ph ph-arrow-up-right"></i></button>
+      </header>
+
+      <div class="content-scroll">
+        <!-- Sarah Profile Card (Dynamic & Editable) -->
+        <div class="profile-card card cursor-pointer" id="profile-card-btn" title="Click to edit profile">
+          <img src="sarah.jpg" alt="Sarah Jenkins" class="profile-avatar">
+          <div class="profile-info">
+            <h3 class="profile-name" id="user-profile-name">Sarah Jenkins</h3>
+            <p class="profile-role" id="user-profile-role">Warehouse Lead</p>
+            <p class="profile-company" id="user-profile-company">Apex Event Gear</p>
+          </div>
+          <i class="ph ph-pencil-simple text-muted" style="font-size: 16px;"></i>
+        </div>
+
+        <!-- Warehouse Info Group (Dynamic & Clickable) -->
+        <div class="settings-group-card card mt-4">
+          <div class="settings-row clickable" id="row-warehouse-hub">
+            <div class="settings-row-left">
+              <div class="settings-icon-box">
+                <i class="ph ph-asterisk"></i>
+              </div>
+              <div class="settings-row-text">
+                <h4 id="settings-hub-name">Warehouse Hub</h4>
+                <p id="settings-hub-sub">Central Logistics Hub</p>
+              </div>
+            </div>
+            <i class="ph ph-caret-right chevron-icon"></i>
+          </div>
+          <div class="settings-divider"></div>
+          <div class="settings-row clickable" id="row-gate-hours">
+            <div class="settings-row-left">
+              <div class="settings-icon-box">
+                <i class="ph ph-clock"></i>
+              </div>
+              <div class="settings-row-text">
+                <h4>Gate Access Hours</h4>
+                <p id="settings-gate-hours">07:00 AM - 10:00 PM</p>
+              </div>
+            </div>
+            <i class="ph ph-caret-right chevron-icon"></i>
+          </div>
+        </div>
+
+        <!-- Notifications Group (Dynamic Toggles & Real Persistence) -->
+        <div class="section-label mt-6">NOTIFICATIONS</div>
+        <div class="settings-group-card card mt-2">
+          <div class="settings-row">
+            <div class="settings-row-left">
+              <div class="settings-icon-box">
+                <i class="ph ph-bell-ringing"></i>
+              </div>
+              <div class="settings-row-text">
+                <h4>Overdue Return Alerts</h4>
+              </div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-overdue" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="settings-divider"></div>
+          <div class="settings-row">
+            <div class="settings-row-left">
+              <div class="settings-icon-box">
+                <i class="ph ph-warning-circle"></i>
+              </div>
+              <div class="settings-row-text">
+                <h4>Low Stock Warning</h4>
+              </div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-low-stock" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="settings-divider"></div>
+          <div class="settings-row">
+            <div class="settings-row-left">
+              <div class="settings-icon-box">
+                <i class="ph ph-export"></i>
+              </div>
+              <div class="settings-row-text">
+                <h4>Export Data</h4>
+              </div>
+            </div>
+            <div class="export-actions">
+              <button class="pill-btn" id="btn-export-csv" title="Download real CSV spreadsheet">CSV</button>
+              <button class="pill-btn" id="btn-export-pdf" title="Generate printable PDF report">PDF</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Reset & Log Out -->
+        <div class="mt-4">
+          <button class="btn-outline-white" id="btn-reset-demo-data" style="margin-bottom: 10px;">
+            <i class="ph ph-arrows-clockwise"></i> Reset Demo Data
+          </button>
+        </div>
+        <div class="mb-6">
+          <button class="logout-btn card" id="btn-logout">
+            <i class="ph ph-sign-out"></i>
+            <span>Log Out</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3) ADD RENTAL PAGE (Screen 6 / 6) Add Rental Clean) -->
+    <div id="add-rental-page" class="page">
       <div class="status-bar">
         <span class="time">9:41</span>
+        <div class="status-pill-center">
+          <span class="green-dot"></span> Active Step
+        </div>
+        <div class="status-icons">
+          <i class="ph-fill ph-cell-signal-full"></i>
+          <i class="ph-fill ph-wifi-high"></i>
+          <i class="ph-fill ph-battery-full"></i>
+        </div>
+      </div>
+
+      <header class="header back-header">
+        <button class="icon-btn-light back-btn" id="back-from-add-rental" title="Back">
+          <i class="ph ph-arrow-left"></i>
+        </button>
+        <h3 class="header-nav-title">New Rental</h3>
+        <div class="header-placeholder"></div>
+      </header>
+
+      <div class="content-scroll pb-140">
+        <!-- Equipment Selector Card (Dynamic) -->
+        <div class="equipment-select-box card" id="equip-select-box">
+          <div class="equipment-select-left">
+            <div class="equipment-icon-badge">
+              <i class="ph ph-speaker-hifi" id="new-rental-icon"></i>
+            </div>
+            <div class="equipment-select-info">
+              <h4 id="new-rental-equip-title">Speakers (JBL 15")</h4>
+              <p id="new-rental-avail-text">10 available</p>
+            </div>
+          </div>
+          <i class="ph ph-caret-up-down select-caret"></i>
+        </div>
+
+        <!-- Dynamic Dropdown Menu -->
+        <div class="equipment-dropdown-menu card" id="equip-dropdown-menu" style="display: none;">
+          <!-- Populated dynamically by script.js -->
+        </div>
+
+        <!-- Quantity Stepper -->
+        <div class="form-row-stepper mt-4">
+          <label class="form-label">Quantity</label>
+          <div class="stepper-box">
+            <button type="button" class="stepper-btn" id="add-qty-minus"><i class="ph ph-minus"></i></button>
+            <span class="stepper-value" id="add-qty-val">4</span>
+            <button type="button" class="stepper-btn" id="add-qty-plus"><i class="ph ph-plus"></i></button>
+          </div>
+        </div>
+
+        <!-- Client / Event Name -->
+        <div class="form-group mt-4">
+          <label class="form-label">Client / Event Name</label>
+          <div class="input-wrap">
+            <input type="text" id="add-client-input" class="form-input" value="Sharma Wedding" placeholder="Enter client or event name">
+          </div>
+        </div>
+
+        <!-- Contact Phone -->
+        <div class="form-group mt-4">
+          <label class="form-label">Contact Phone</label>
+          <div class="input-wrap">
+            <input type="tel" id="add-phone-input" class="form-input" value="+91 98201 55432" placeholder="e.g. +91 98201 55432">
+          </div>
+        </div>
+
+        <!-- Return Date & Time -->
+        <div class="form-group mt-4">
+          <label class="form-label">Return Date & Time</label>
+          <div class="input-wrap with-trailing-icon">
+            <input type="text" id="add-return-input" class="form-input" value="21 Sep 2025, 06:00 PM" placeholder="Select return date & time">
+            <i class="ph ph-calendar-blank input-trailing-icon"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="sticky-footer add-rental-footer">
+        <button class="btn-primary-green" id="btn-confirm-rental">Confirm Rental</button>
+        <button class="btn-text-cancel" id="btn-cancel-rental-add">Cancel</button>
+        <div class="home-indicator"></div>
+      </div>
+    </div>
+
+    <!-- 4) EQUIPMENT DETAILS PAGE (Screen 4 / 5) Equipment Details Clean) -->
+    <div id="equipment-details-page" class="page">
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <div class="notch-pill"></div>
+        <div class="status-icons">
+          <i class="ph-fill ph-cell-signal-full"></i>
+          <i class="ph-fill ph-wifi-high"></i>
+          <i class="ph-fill ph-battery-full"></i>
+        </div>
+      </div>
+
+      <header class="header back-header">
+        <button class="icon-btn-light back-btn" id="back-from-details" title="Back">
+          <i class="ph ph-arrow-left"></i>
+        </button>
+        <h3 class="header-nav-title" id="equip-details-header-title">Speakers</h3>
+        <button class="icon-btn-light" id="btn-equip-details-more" title="More options">
+          <i class="ph ph-dots-three-vertical"></i>
+        </button>
+      </header>
+
+      <div class="content-scroll pb-100">
+        <!-- 3-Column Stats Card (Dynamic) -->
+        <div class="stats-3col-card card">
+          <div class="stat-col">
+            <span class="stat-col-label">Total</span>
+            <span class="stat-col-val" id="equip-stat-total">20</span>
+          </div>
+          <div class="stat-col-divider"></div>
+          <div class="stat-col">
+            <span class="stat-col-label">Available</span>
+            <span class="stat-col-val" id="equip-stat-avail">10</span>
+          </div>
+          <div class="stat-col-divider"></div>
+          <div class="stat-col">
+            <span class="stat-col-label">Rented</span>
+            <span class="stat-col-val" id="equip-stat-rented">10</span>
+          </div>
+        </div>
+
+        <!-- Section: Currently Rented (Dynamic) -->
+        <h3 class="section-heading mt-6">Currently Rented</h3>
+
+        <div class="currently-rented-list mt-3" id="details-rented-list">
+          <!-- Populated dynamically by script.js -->
+        </div>
+      </div>
+
+      <!-- Sticky Button -->
+      <div class="sticky-footer">
+        <button class="btn-primary-green" id="btn-rent-out-units">
+          + Rent Out Units
+        </button>
+        <div class="home-indicator"></div>
+      </div>
+    </div>
+
+    <!-- 5) EDIT RENTAL PAGE (Screen 5 / 7) Edit Rental Clean) -->
+    <div id="edit-rental-page" class="page">
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <div class="notch-pill"></div>
+        <div class="status-icons">
+          <i class="ph-fill ph-cell-signal-full"></i>
+          <i class="ph-fill ph-wifi-high"></i>
+          <i class="ph-fill ph-battery-full"></i>
+        </div>
+      </div>
+
+      <header class="header back-header">
+        <button class="icon-btn-light back-btn" id="back-from-edit-rental" title="Back">
+          <i class="ph ph-arrow-left"></i>
+        </button>
+        <h3 class="header-nav-title" id="edit-page-rental-id">Rental #RN-8042</h3>
+        <span class="status-badge-active" id="edit-badge-status">
+          <span class="badge-dot"></span> Active
+        </span>
+      </header>
+
+      <div class="content-scroll pb-160">
+        <!-- Rental Overview Card (Dynamic) -->
+        <div class="rental-summary-card card">
+          <h3 class="rental-event-name" id="edit-view-client-title">Sharma Wedding</h3>
+          <p class="rental-equip-summary" id="edit-view-equip-summary">4x JBL EON 15" Speakers</p>
+          <div class="rental-date-row">
+            <span id="edit-view-start-date">20 Sep, 10:30 AM</span>
+            <i class="ph ph-arrow-right date-arrow"></i>
+            <span id="edit-view-return-date">21 Sep, 06:00 PM</span>
+          </div>
+        </div>
+
+        <!-- Section Label -->
+        <div class="section-label mt-6">RENTAL DETAILS</div>
+
+        <!-- Form Details Container (Dynamic) -->
+        <div class="card edit-form-card mt-2">
+          <!-- Quantity Stepper -->
+          <div class="edit-field-stepper-row">
+            <label class="form-label-bold">Quantity on site</label>
+            <div class="stepper-box">
+              <button type="button" class="stepper-btn" id="edit-qty-minus"><i class="ph ph-minus"></i></button>
+              <span class="stepper-value" id="edit-qty-val">4</span>
+              <button type="button" class="stepper-btn" id="edit-qty-plus"><i class="ph ph-plus"></i></button>
+            </div>
+          </div>
+
+          <div class="edit-field-divider"></div>
+
+          <!-- Client / Event Name -->
+          <div class="edit-field-row">
+            <label class="field-sublabel">Client / Event Name</label>
+            <div class="input-wrap no-border">
+              <input type="text" id="edit-input-client" class="form-input clean" value="Sharma Wedding">
+            </div>
+          </div>
+
+          <div class="edit-field-divider"></div>
+
+          <!-- Responsible Contact with Icon -->
+          <div class="edit-field-row">
+            <label class="field-sublabel">Responsible Contact</label>
+            <div class="input-wrap no-border with-icon-left">
+              <i class="ph ph-user input-leading-icon"></i>
+              <input type="text" id="edit-input-contact" class="form-input clean" value="Rahul Sharma (+91 98402 11920)">
+            </div>
+          </div>
+
+          <div class="edit-field-divider"></div>
+
+          <!-- Expected Return with Icon -->
+          <div class="edit-field-row">
+            <label class="field-sublabel">Expected Return</label>
+            <div class="input-wrap no-border with-icon-left">
+              <i class="ph ph-calendar-blank input-leading-icon"></i>
+              <input type="text" id="edit-input-return" class="form-input clean" value="21 Sep 2025, 06:00 PM">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions Bottom Footer -->
+      <div class="sticky-footer multi-actions">
+        <button class="btn-primary-green with-icon" id="btn-mark-units-returned">
+          <i class="ph ph-check-circle"></i> Mark Units as Returned
+        </button>
+        <button class="btn-outline-white with-icon" id="btn-save-rental-changes">
+          <i class="ph ph-floppy-disk"></i> Save Changes
+        </button>
+        <button class="btn-danger-link" id="btn-cancel-rental">
+          <i class="ph ph-prohibit"></i> Cancel Rental
+        </button>
+        <div class="home-indicator"></div>
+      </div>
+    </div>
+
+    <!-- 6) RENTALS TAB PAGE (All Rentals) -->
+    <div id="rentals-page" class="page">
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <div class="notch-pill"></div>
+        <div class="status-icons">
+          <i class="ph-fill ph-cell-signal-full"></i>
+          <i class="ph-fill ph-wifi-high"></i>
+          <i class="ph-fill ph-battery-full"></i>
+        </div>
+      </div>
+
+      <header class="header page-header">
+        <h2 class="page-title">Rentals</h2>
+        <button class="icon-btn-light" id="btn-rentals-filter" title="Filter"><i class="ph ph-funnel"></i></button>
+      </header>
+
+      <div class="content-scroll pb-100">
+        <div class="search-bar">
+          <i class="ph ph-magnifying-glass"></i>
+          <input type="text" id="rentals-search-input" placeholder="Search rentals or clients...">
+        </div>
+
+        <div class="filter-tabs mt-4">
+          <button class="rental-filter-tab active" data-filter="all">All</button>
+          <button class="rental-filter-tab" data-filter="active">Active</button>
+          <button class="rental-filter-tab" data-filter="due-today">Due Today</button>
+          <button class="rental-filter-tab" data-filter="returned">Returned</button>
+        </div>
+
+        <div class="rentals-overview-list mt-4" id="all-rentals-list">
+          <!-- Populated dynamically by JavaScript -->
+        </div>
+      </div>
+
+      <div class="fab-container">
+        <button class="fab" id="btn-rentals-new-fab">
+          <i class="ph ph-plus"></i> New Rental
+        </button>
+      </div>
+    </div>
+
+    <!-- 7) DASHBOARD PAGE (Dynamic) -->
+    <div id="dashboard-page" class="page">
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <div class="notch-pill"></div>
         <div class="status-icons">
           <i class="ph-fill ph-cell-signal-full"></i>
           <i class="ph-fill ph-wifi-high"></i>
@@ -24,53 +488,53 @@
       </div>
       
       <header class="header">
-         <div class="logo">
-           <div class="logo-icon">
-             <i class="ph ph-stack"></i>
-           </div>
-           <h2>Rentory</h2>
-         </div>
-         <div class="header-actions">
-           <button class="icon-btn"><i class="ph ph-magnifying-glass"></i></button>
-           <div class="avatar">S</div>
-         </div>
+        <div class="logo">
+          <div class="logo-icon">
+            <i class="ph ph-stack"></i>
+          </div>
+          <h2>Rentory</h2>
+        </div>
+        <div class="header-actions">
+          <button class="icon-btn" id="dash-search-btn"><i class="ph ph-magnifying-glass"></i></button>
+          <img src="sarah.jpg" alt="Sarah" class="avatar-img cursor-pointer" id="dash-avatar-btn">
+        </div>
       </header>
 
       <div class="content-scroll">
         <div class="greeting-section">
-          <p class="date">Monday, 20 Sep</p>
-          <h1>Good morning, Sarah</h1>
+          <p class="date" id="dash-current-date">Monday, 20 Sep</p>
+          <h1 id="dash-greeting-text">Good morning, Sarah</h1>
         </div>
 
         <div class="stats-overview card">
           <div class="stat">
-            <span class="stat-value">65</span>
+            <span class="stat-value" id="dash-total-stat">65</span>
             <span class="stat-label">TOTAL</span>
           </div>
           <div class="divider"></div>
           <div class="stat">
-            <span class="stat-value">42</span>
+            <span class="stat-value" id="dash-avail-stat">42</span>
             <span class="stat-label">AVAILABLE</span>
           </div>
           <div class="divider"></div>
           <div class="stat">
-            <span class="stat-value">23</span>
+            <span class="stat-value" id="dash-rented-stat">23</span>
             <span class="stat-label">RENTED</span>
           </div>
         </div>
 
         <div class="section-header mt-6">
           <h3 class="section-title">UPCOMING RETURN</h3>
-          <span class="badge">1 Due Today</span>
+          <span class="badge" id="dash-upcoming-badge">1 Due Today</span>
         </div>
         
-        <div class="upcoming-card card mt-3">
+        <div class="upcoming-card card mt-3 cursor-pointer" id="dash-upcoming-card">
           <div class="upcoming-icon">
             <i class="ph ph-calendar-check"></i>
           </div>
           <div class="upcoming-info">
-            <h4>Sharma Wedding</h4>
-            <p>4 Speakers &bull; <span class="due-time">Due 6:00 PM today</span></p>
+            <h4 id="dash-upcoming-title">Sharma Wedding</h4>
+            <p><span id="dash-upcoming-units">4 Speakers</span> &bull; <span class="due-time" id="dash-upcoming-time">Due 6:00 PM today</span></p>
           </div>
           <button class="next-btn"><i class="ph ph-caret-right"></i></button>
         </div>
@@ -81,158 +545,142 @@
               <h3>Quick Inventory Status</h3>
               <p class="subtitle">Real-time availability balance</p>
             </div>
-            <a href="#" class="view-all">View All <i class="ph ph-caret-right"></i></a>
+            <a href="#" class="view-all" id="dash-view-all-inv">View All <i class="ph ph-caret-right"></i></a>
           </div>
 
-          <div class="inventory-item">
-            <div class="item-header">
-              <span class="item-name"><i class="ph ph-speaker-hifi"></i> Speakers</span>
-              <span class="item-count"><strong>10</strong> of 20 available</span>
-            </div>
-            <div class="progress-bar-container"><div class="progress" style="width: 50%"></div></div>
-          </div>
-          
-          <div class="inventory-item">
-            <div class="item-header">
-              <span class="item-name"><i class="ph ph-microphone"></i> Microphones</span>
-              <span class="item-count"><strong>12</strong> of 15 available</span>
-            </div>
-            <div class="progress-bar-container"><div class="progress" style="width: 80%"></div></div>
-          </div>
-
-          <div class="inventory-item">
-            <div class="item-header">
-              <span class="item-name"><i class="ph ph-lightbulb"></i> Stage Lights</span>
-              <span class="item-count"><strong>20</strong> of 30 available</span>
-            </div>
-            <div class="progress-bar-container"><div class="progress" style="width: 66%"></div></div>
+          <div class="quick-inventory-list" id="dash-quick-inventory-items">
+            <!-- Dynamically populated -->
           </div>
         </div>
       </div>
       
       <div class="fab-container">
-        <button class="fab">
+        <button class="fab" id="dash-new-rental-fab">
           <i class="ph ph-plus"></i> New Rental
         </button>
       </div>
     </div>
 
-    <!-- INVENTORY PAGE -->
-    <div id="inventory-page" class="page">
-      <div class="status-bar">
-        <span class="time">9:41</span>
-        <div class="status-icons">
-          <i class="ph-fill ph-cell-signal-full"></i>
-          <i class="ph-fill ph-wifi-high"></i>
-          <i class="ph-fill ph-battery-full"></i>
-        </div>
-      </div>
-
-      <header class="header">
-         <h2 class="page-title">Inventory</h2>
-         <button class="icon-btn-light"><i class="ph ph-qr-code"></i></button>
-      </header>
-
-      <div class="content-scroll">
-        <div class="search-bar">
-          <i class="ph ph-magnifying-glass"></i>
-          <input type="text" placeholder="Search equipment...">
-        </div>
-
-        <div class="inventory-stats mt-4">
-          <div class="stat-card">
-            <span class="stat-label">AVAILABLE</span>
-            <span class="stat-value large">42</span>
-            <div class="progress-bar-container thick"><div class="progress" style="width: 65%"></div></div>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">RENTED</span>
-            <span class="stat-value large">23</span>
-            <div class="progress-bar-container thick"><div class="progress" style="width: 35%"></div></div>
-          </div>
-        </div>
-
-        <div class="filter-tabs mt-6">
-          <button class="filter-tab active">All</button>
-          <button class="filter-tab">Audio</button>
-          <button class="filter-tab">Lighting</button>
-        </div>
-
-        <div class="inventory-list mt-4">
-          <!-- Item 1 -->
-          <div class="list-card card">
-            <img src="speaker.png" alt="Speaker" class="item-img">
-            <div class="item-details">
-              <div class="item-title-row">
-                <h4>JBL EON 15" Speakers</h4>
-                <span class="item-stock"><strong>10</strong> / 20 Avail</span>
-              </div>
-              <div class="progress-bar-container"><div class="progress" style="width: 50%"></div></div>
-            </div>
-          </div>
-          <!-- Item 2 -->
-          <div class="list-card card">
-            <img src="microphone.png" alt="Microphone" class="item-img">
-            <div class="item-details">
-              <div class="item-title-row">
-                <h4>Wireless Microphones (Shure)</h4>
-                <span class="item-stock"><strong>12</strong> / 15 Avail</span>
-              </div>
-              <div class="progress-bar-container"><div class="progress" style="width: 80%"></div></div>
-            </div>
-          </div>
-          <!-- Item 3 -->
-          <div class="list-card card">
-            <img src="lights.png" alt="Lights" class="item-img">
-            <div class="item-details">
-              <div class="item-title-row">
-                <h4>Stage Lights (RGBW DMX)</h4>
-                <span class="item-stock"><strong>20</strong> / 30 Avail</span>
-              </div>
-              <div class="progress-bar-container"><div class="progress" style="width: 66%"></div></div>
-            </div>
-          </div>
-          <!-- Item 4 -->
-          <div class="list-card card">
-            <img src="fog.png" alt="Fog Machine" class="item-img">
-            <div class="item-details">
-              <div class="item-title-row">
-                <h4>Fog & FX Machines</h4>
-                <span class="item-stock"><strong>5</strong> / 8 Avail</span>
-              </div>
-              <div class="progress-bar-container"><div class="progress" style="width: 62.5%"></div></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="fab-container">
-        <button class="fab">
-          <i class="ph ph-plus"></i> Add Equipment
-        </button>
-      </div>
-    </div>
-
-    <!-- BOTTOM NAV -->
-    <nav class="bottom-nav">
-      <a href="#" class="nav-item active" data-target="dashboard-page">
-        <i class="ph-fill ph-squares-four"></i>
+    <!-- BOTTOM NAV (Shown on primary tab pages) -->
+    <nav class="bottom-nav" id="main-bottom-nav">
+      <a href="#" class="nav-item" data-target="dashboard-page" id="nav-dashboard">
+        <i class="ph ph-squares-four"></i>
         <span>Dashboard</span>
       </a>
-      <a href="#" class="nav-item" data-target="inventory-page">
-        <i class="ph ph-archive-box"></i>
+      <a href="#" class="nav-item active" data-target="inventory-page" id="nav-inventory">
+        <i class="ph-fill ph-archive-box"></i>
         <span>Inventory</span>
       </a>
-      <a href="#" class="nav-item">
+      <a href="#" class="nav-item" data-target="rentals-page" id="nav-rentals">
         <i class="ph ph-calendar-blank"></i>
         <span>Rentals</span>
       </a>
-      <a href="#" class="nav-item">
+      <a href="#" class="nav-item" data-target="settings-page" id="nav-settings">
         <i class="ph ph-gear"></i>
         <span>Settings</span>
       </a>
       <div class="home-indicator"></div>
     </nav>
+
+    <!-- Global Toast Banner -->
+    <div class="toast" id="app-toast">
+      <i class="ph-fill ph-check-circle toast-icon" id="toast-icon"></i>
+      <span id="toast-message">Action successful</span>
+    </div>
+
+    <!-- MODAL: ADD NEW EQUIPMENT (Real Dynamic Addition) -->
+    <div class="modal-backdrop" id="modal-add-equipment" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Add New Equipment</h3>
+          <button class="modal-close-btn" id="close-modal-equip"><i class="ph ph-x"></i></button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Equipment Name</label>
+            <input type="text" id="modal-equip-name" class="form-input" placeholder="e.g. Pioneer DJ Controller DDJ-1000">
+          </div>
+          <div class="form-group mt-3">
+            <label class="form-label">Short Display Name</label>
+            <input type="text" id="modal-equip-short" class="form-input" placeholder="e.g. DJ Controllers">
+          </div>
+          <div class="form-group mt-3">
+            <label class="form-label">Category</label>
+            <select id="modal-equip-category" class="form-input select-input">
+              <option value="audio">Audio</option>
+              <option value="lighting">Lighting</option>
+              <option value="effects">Effects</option>
+              <option value="staging">Staging & Video</option>
+            </select>
+          </div>
+          <div class="form-group mt-3">
+            <label class="form-label">Total Stock Quantity</label>
+            <input type="number" id="modal-equip-qty" class="form-input" value="10" min="1" max="500">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-text-cancel" id="btn-cancel-add-equip">Cancel</button>
+          <button class="btn-primary-green" id="btn-save-new-equip">Add Equipment</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: EDIT WAREHOUSE / HUB DETAILS -->
+    <div class="modal-backdrop" id="modal-edit-hub" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Logistics Location Settings</h3>
+          <button class="modal-close-btn" id="close-modal-hub"><i class="ph ph-x"></i></button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Hub Name</label>
+            <input type="text" id="modal-hub-name-input" class="form-input" value="Warehouse Hub">
+          </div>
+          <div class="form-group mt-3">
+            <label class="form-label">Sub-Location / Sector</label>
+            <input type="text" id="modal-hub-sub-input" class="form-input" value="Central Logistics Hub">
+          </div>
+          <div class="form-group mt-3">
+            <label class="form-label">Gate Access Hours</label>
+            <input type="text" id="modal-gate-hours-input" class="form-input" value="07:00 AM - 10:00 PM">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-text-cancel" id="btn-cancel-hub">Cancel</button>
+          <button class="btn-primary-green" id="btn-save-hub">Save Hub Settings</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: EDIT USER PROFILE -->
+    <div class="modal-backdrop" id="modal-edit-profile" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Edit Profile</h3>
+          <button class="modal-close-btn" id="close-modal-profile"><i class="ph ph-x"></i></button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" id="modal-profile-name-input" class="form-input" value="Sarah Jenkins">
+          </div>
+          <div class="form-group mt-3">
+            <label class="form-label">Role</label>
+            <input type="text" id="modal-profile-role-input" class="form-input" value="Warehouse Lead">
+          </div>
+          <div class="form-group mt-3">
+            <label class="form-label">Organization</label>
+            <input type="text" id="modal-profile-company-input" class="form-input" value="Apex Event Gear">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-text-cancel" id="btn-cancel-profile">Cancel</button>
+          <button class="btn-primary-green" id="btn-save-profile">Save Profile</button>
+        </div>
+      </div>
+    </div>
+
   </div>
   <script src="script.js"></script>
 </body>
