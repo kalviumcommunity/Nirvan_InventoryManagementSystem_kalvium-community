@@ -184,4 +184,4 @@ alembic upgrade head
 - Built as part of the **Kalvium Community** project initiative.
 - Maintained by [Nirvan Jain](https://github.com/NirvanJain).
 - [Aman Singh](https://github.com/aman-singh-12).
-- [Devi Shree Prakash] (https://github.com/karipidevishree10-arch).
+- [Devi Shree Prakash](https://github.com/karipidevishree10-arch).
