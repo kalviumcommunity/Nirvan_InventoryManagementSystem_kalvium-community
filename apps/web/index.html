@@ -317,6 +317,18 @@
       </header>
 
       <div class="content-scroll pb-100">
+        <!-- Equipment Card (Dynamic) -->
+        <div class="card mb-4" style="display: flex; align-items: center; gap: 14px; padding: 16px; margin-bottom: 12px;">
+          <div class="equipment-icon-badge" style="width: 52px; height: 52px; border-radius: 12px; background: #F3F4F6; display: flex; align-items: center; justify-content: center; font-size: 26px; color: var(--primary-green); flex-shrink: 0;">
+            <i class="ph ph-speaker-hifi" id="equip-details-icon"></i>
+          </div>
+          <div style="flex: 1;">
+            <span class="badge" id="equip-details-cat-badge" style="font-size: 10px; text-transform: uppercase;">AUDIO</span>
+            <h3 id="equip-details-title" style="font-size: 16px; font-weight: 700; color: var(--text-main); margin-top: 2px;">JBL EON 15" Speakers</h3>
+            <p id="equip-details-rate" style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">$45/day</p>
+          </div>
+        </div>
+
         <!-- 3-Column Stats Card (Dynamic) -->
         <div class="stats-3col-card card">
           <div class="stat-col">
@@ -694,6 +706,26 @@
         <div class="modal-footer">
           <button class="btn-text-cancel" id="btn-cancel-profile">Cancel</button>
           <button class="btn-primary-green" id="btn-save-profile">Save Profile</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: QR SCANNER SIMULATOR -->
+    <div class="modal-backdrop" id="modal-qr-scanner" style="display: none;">
+      <div class="modal-card" style="text-align: center;">
+        <div class="modal-header">
+          <h3>Scan Asset QR Code</h3>
+          <button class="modal-close-btn" id="close-modal-qr"><i class="ph ph-x"></i></button>
+        </div>
+        <div class="modal-body" style="padding: 20px 0;">
+          <div style="width: 140px; height: 140px; margin: 0 auto; border: 2px dashed var(--primary-green); border-radius: 16px; display: flex; align-items: center; justify-content: center; background: #F9FAFB;">
+            <i class="ph ph-qr-code" style="font-size: 72px; color: var(--primary-green);"></i>
+          </div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-top: 14px;">Point camera at warehouse equipment QR tag or barcode.</p>
+        </div>
+        <div class="modal-footer" style="justify-content: center; gap: 10px;">
+          <button class="btn-text-cancel" id="btn-cancel-qr">Cancel</button>
+          <button class="btn-primary-green" id="btn-simulate-scan"><i class="ph ph-scan"></i> Simulate Scan</button>
         </div>
       </div>
     </div>

@@ -607,6 +607,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const catBadge = document.getElementById('equip-details-cat-badge');
     if (catBadge) catBadge.textContent = (equip.category || 'Audio').toUpperCase();
 
+    const iconEl = document.getElementById('equip-details-icon');
+    if (iconEl) iconEl.className = `ph ${equip.icon || 'ph-speaker-hifi'}`;
+
     const titleEl = document.getElementById('equip-details-title');
     if (titleEl) titleEl.textContent = equip.name;
 
@@ -735,14 +738,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     addRentalQuantity = Math.min(4, Math.max(1, equip.available || 1));
-    const qtyVal = document.getElementById('rental-qty-val');
+    const qtyVal = document.getElementById('add-qty-val') || document.getElementById('rental-qty-val');
     if (qtyVal) qtyVal.textContent = addRentalQuantity;
 
     updateAddRentalEquipDisplay(equip);
 
     // Reset input fields
-    const clientIn = document.getElementById('rental-client-input');
-    const phoneIn = document.getElementById('rental-phone-input');
+    const clientIn = document.getElementById('add-client-input') || document.getElementById('rental-client-input');
+    const phoneIn = document.getElementById('add-phone-input') || document.getElementById('rental-phone-input');
     if (clientIn) clientIn.value = '';
     if (phoneIn) phoneIn.value = '';
 
@@ -750,14 +753,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updateAddRentalEquipDisplay(equip) {
-    const iconBadge = document.getElementById('selected-equip-icon');
-    const nameEl = document.getElementById('selected-equip-name');
-    const availEl = document.getElementById('selected-equip-avail');
+    const iconBadge = document.getElementById('new-rental-icon') || document.getElementById('selected-equip-icon');
+    const nameEl = document.getElementById('new-rental-equip-title') || document.getElementById('selected-equip-name');
+    const availEl = document.getElementById('new-rental-avail-text') || document.getElementById('selected-equip-avail');
 
-    if (iconBadge) iconBadge.className = `equipment-icon-badge <i class="ph ${equip.icon || 'ph-speaker-hifi'}"></i>`;
+    if (iconBadge) {
+      iconBadge.className = `ph ${equip.icon || 'ph-speaker-hifi'}`;
+    }
     if (nameEl) nameEl.textContent = equip.name;
     if (availEl) {
-      availEl.innerHTML = `<span class="avail-dot"></span> ${equip.available} of ${equip.total} Available`;
+      availEl.innerHTML = `${equip.available} available`;
     }
   }
 
@@ -770,7 +775,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (addRentalQuantity > equip.available && equip.available > 0) {
       addRentalQuantity = equip.available;
-      const qtyVal = document.getElementById('rental-qty-val');
+      const qtyVal = document.getElementById('add-qty-val') || document.getElementById('rental-qty-val');
       if (qtyVal) qtyVal.textContent = addRentalQuantity;
     }
   }
@@ -789,15 +794,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Stepper: Add Rental
-  const btnQtyMinus = document.getElementById('btn-qty-minus');
-  const btnQtyPlus = document.getElementById('btn-qty-plus');
-  const rentalQtyVal = document.getElementById('rental-qty-val');
+  const btnQtyMinus = document.getElementById('add-qty-minus') || document.getElementById('btn-qty-minus');
+  const btnQtyPlus = document.getElementById('add-qty-plus') || document.getElementById('btn-qty-plus');
 
   if (btnQtyMinus) {
     btnQtyMinus.addEventListener('click', () => {
       if (addRentalQuantity > 1) {
         addRentalQuantity--;
-        rentalQtyVal.textContent = addRentalQuantity;
+        const qEl = document.getElementById('add-qty-val') || document.getElementById('rental-qty-val');
+        if (qEl) qEl.textContent = addRentalQuantity;
       }
     });
   }
@@ -807,20 +812,26 @@ document.addEventListener('DOMContentLoaded', () => {
       const equip = state.inventory[addRentalSelectedEquip];
       if (equip && addRentalQuantity < equip.available) {
         addRentalQuantity++;
-        rentalQtyVal.textContent = addRentalQuantity;
+        const qEl = document.getElementById('add-qty-val') || document.getElementById('rental-qty-val');
+        if (qEl) qEl.textContent = addRentalQuantity;
       } else {
-        showToast(`Only ${equip.available} units available in stock`, 'ph-warning');
+        showToast(`Only ${equip ? equip.available : 0} units available in stock`, 'ph-warning');
       }
     });
+  }
+
+  const btnCancelRentalAdd = document.getElementById('btn-cancel-rental-add');
+  if (btnCancelRentalAdd) {
+    btnCancelRentalAdd.addEventListener('click', () => goBack());
   }
 
   // Submit: Confirm & Create Rental
   const btnConfirmRental = document.getElementById('btn-confirm-rental');
   if (btnConfirmRental) {
     btnConfirmRental.addEventListener('click', async () => {
-      const clientName = document.getElementById('rental-client-input')?.value.trim();
-      const phone = document.getElementById('rental-phone-input')?.value.trim() || '+91 98201 00000';
-      const returnDate = document.getElementById('rental-return-date')?.value || '21 Sep 2025, 06:00 PM';
+      const clientName = (document.getElementById('add-client-input') || document.getElementById('rental-client-input'))?.value.trim();
+      const phone = (document.getElementById('add-phone-input') || document.getElementById('rental-phone-input'))?.value.trim() || '+91 98201 00000';
+      const returnDate = (document.getElementById('add-return-input') || document.getElementById('rental-return-date'))?.value || '21 Sep 2025, 06:00 PM';
       const equip = state.inventory[addRentalSelectedEquip];
 
       if (!clientName) {
@@ -1495,7 +1506,7 @@ document.addEventListener('DOMContentLoaded', () => {
       greetingEl.textContent = `Good morning, ${state.settings.userName.split(' ')[0]}`;
     }
 
-    const dateEl = document.getElementById('dash-date-text');
+    const dateEl = document.getElementById('dash-current-date') || document.getElementById('dash-date-text');
     if (dateEl) {
       const today = new Date();
       dateEl.textContent = today.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'short' });
@@ -1509,9 +1520,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     const totalAll = totalAvail + totalRented;
 
-    const totalEl = document.getElementById('dash-stat-total');
-    const availEl = document.getElementById('dash-stat-avail');
-    const rentedEl = document.getElementById('dash-stat-rented');
+    const totalEl = document.getElementById('dash-total-stat') || document.getElementById('dash-stat-total');
+    const availEl = document.getElementById('dash-avail-stat') || document.getElementById('dash-stat-avail');
+    const rentedEl = document.getElementById('dash-rented-stat') || document.getElementById('dash-stat-rented');
     if (totalEl) totalEl.textContent = totalAll;
     if (availEl) availEl.textContent = totalAvail;
     if (rentedEl) rentedEl.textContent = totalRented;
@@ -1524,11 +1535,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (upcomingContainer) {
       if (urgentRental) {
         upcomingContainer.style.display = 'flex';
-        const clientEl = document.getElementById('dash-upcoming-client');
+        const clientEl = document.getElementById('dash-upcoming-title') || document.getElementById('dash-upcoming-client');
+        const unitsEl = document.getElementById('dash-upcoming-units');
+        const timeEl = document.getElementById('dash-upcoming-time');
         const detailsEl = document.getElementById('dash-upcoming-details');
         const badgeEl = document.getElementById('dash-upcoming-badge');
 
         if (clientEl) clientEl.textContent = urgentRental.client;
+        if (unitsEl) unitsEl.textContent = `${urgentRental.units}x ${urgentRental.equipName}`;
+        if (timeEl) timeEl.textContent = urgentRental.dueText;
         if (detailsEl) detailsEl.textContent = `${urgentRental.units}x ${urgentRental.equipName} • ${urgentRental.dueText}`;
         if (badgeEl) badgeEl.textContent = '1 Due Today';
 
@@ -1541,18 +1556,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Quick Inventory status bars
-    const quickContainer = document.getElementById('dash-quick-inventory-container');
+    const quickContainer = document.getElementById('dash-quick-inventory-items') || 
+                           document.getElementById('dash-quick-inventory-container');
     if (quickContainer) {
       quickContainer.innerHTML = '';
       const itemsList = Object.values(state.inventory);
       if (itemsList.length === 0) {
-        quickContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 13px;">No equipment cataloged.</p>';
+        quickContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 13px; padding: 12px 0;">No equipment cataloged.</p>';
       } else {
         itemsList.slice(0, 4).forEach(item => {
           const pct = item.total > 0 ? Math.round((item.available / item.total) * 100) : 0;
           const row = document.createElement('div');
           row.className = 'inventory-item cursor-pointer';
-          row.style.marginBottom = '12px';
+          row.setAttribute('data-id', item.id);
           row.innerHTML = `
             <div class="item-header">
               <span class="item-name"><i class="ph ${item.icon || 'ph-package'}"></i> ${item.name}</span>
@@ -1571,7 +1587,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Dashboard shortcut buttons
-  const dashBtnViewAll = document.getElementById('dash-btn-view-all');
+  const dashBtnViewAll = document.getElementById('dash-view-all-inv') || document.getElementById('dash-btn-view-all');
   if (dashBtnViewAll) {
     dashBtnViewAll.addEventListener('click', (e) => {
       e.preventDefault();
@@ -1579,7 +1595,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  const dashBtnQuickSearch = document.getElementById('dash-btn-quick-search');
+  const dashBtnQuickSearch = document.getElementById('dash-search-btn') || document.getElementById('dash-btn-quick-search');
   if (dashBtnQuickSearch) {
     dashBtnQuickSearch.addEventListener('click', () => {
       navigateTo('inventory-page');
@@ -1588,7 +1604,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  const dashBtnNewRental = document.getElementById('dash-btn-new-rental');
+  const dashAvatarBtn = document.getElementById('dash-avatar-btn');
+  if (dashAvatarBtn) {
+    dashAvatarBtn.addEventListener('click', () => {
+      navigateTo('settings-page');
+    });
+  }
+
+  const dashBtnNewRental = document.getElementById('dash-new-rental-fab') || document.getElementById('dash-btn-new-rental');
   if (dashBtnNewRental) {
     dashBtnNewRental.addEventListener('click', () => {
       openAddRental(Object.keys(state.inventory)[0] || '1');
