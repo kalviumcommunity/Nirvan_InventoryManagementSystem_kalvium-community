@@ -144,26 +144,50 @@ Open your browser and navigate to `http://localhost:3000`.
 
 ---
 
-### 3. Backend Setup & Infrastructure (`apps/api`)
+### 1. Running the Backend API (`apps/api`)
+
+The backend is built with FastAPI and SQLite (auto-seeded with initial equipment, user, and rentals):
 
 ```bash
-# Launch database and cache services
-docker compose -f infrastructure/docker/docker-compose.yml up -d
-
-# Navigate to the API directory
-cd apps/api
-
-# Create and activate a Python virtual environment
-python -m venv .venv
-# On Windows:
-.venv\Scripts\activate
-# On macOS/Linux:
-source .venv/bin/activate
-
-# Install dependencies & run migrations (once configured)
-pip install -e .
-alembic upgrade head
+# From repository root:
+npm run api
+# Or directly with Python:
+python apps/api/src/main.py
 ```
+API runs on `http://localhost:8000`. You can also explore the interactive Swagger documentation at `http://localhost:8000/docs`.
+
+---
+
+### 2. Running the Web App (`apps/web`)
+
+The web dashboard is fully connected to the backend API:
+
+```bash
+# From repository root:
+npm run web
+# Or manually with npx serve:
+npx serve -l 3000 apps/web
+```
+Open `http://localhost:3000` in your browser.
+
+---
+
+### 3. Running the Mobile App (`apps/mobile`)
+
+```bash
+# From repository root:
+npm run mobile
+# Or run directly in the browser:
+npm run mobile:web
+# Or run on Android emulator / device:
+npm run mobile:android
+```
+
+From the Expo CLI interface:
+- Press `a` to open in an **Android Emulator** or device.
+- Press `i` to open in an **iOS Simulator**.
+- Press `w` to run in a **Web Browser**.
+- Scan the generated QR code using the **Expo Go** app on your physical phone.
 
 ---
 
@@ -173,7 +197,9 @@ alembic upgrade head
 - [x] Mobile authentication & onboarding screens (Welcome, Login / Sign Up).
 - [x] Dynamic mobile inventory dashboard with KPI summaries.
 - [x] Interactive web dashboard & equipment catalog with search and category filtering.
-- [ ] Connect mobile and web apps to live FastAPI backend endpoints.
+- [x] Complete FastAPI domain-driven backend with SQLite auto-seeding.
+- [x] Interconnected dynamic synchronization across dashboard, inventory stock, and rental returns.
+- [x] New Rental dispatch modal & Add Equipment modal integrated with live database.
 - [ ] QR / Barcode scanning for instant gear check-in and check-out.
 - [ ] Rental booking calendar, customer management, and dispatch invoice generation.
 

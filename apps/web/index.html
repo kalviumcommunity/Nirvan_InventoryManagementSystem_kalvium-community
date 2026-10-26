@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Rentory - Inventory Management</title>
+  <title>Rentory - Inventory & Rental Dispatch</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,6 +12,12 @@
 </head>
 <body>
   <div class="app-container">
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast">
+      <i class="ph-fill ph-check-circle" style="color: #4ade80;"></i>
+      <span id="toast-msg">Action completed</span>
+    </div>
+
     <!-- DASHBOARD PAGE -->
     <div id="dashboard-page" class="page active">
       <div class="status-bar">
@@ -31,48 +37,48 @@
            <h2>Rentory</h2>
          </div>
          <div class="header-actions">
-           <button class="icon-btn"><i class="ph ph-magnifying-glass"></i></button>
-           <div class="avatar">S</div>
+           <button class="icon-btn" id="btn-quick-search"><i class="ph ph-magnifying-glass"></i></button>
+           <div class="avatar" id="header-avatar">S</div>
          </div>
       </header>
 
       <div class="content-scroll">
         <div class="greeting-section">
-          <p class="date">Monday, 20 Sep</p>
-          <h1>Good morning, Sarah</h1>
+          <p class="date" id="dash-date">Monday, 20 Sep</p>
+          <h1 id="dash-greeting">Good morning, Sarah</h1>
         </div>
 
         <div class="stats-overview card">
           <div class="stat">
-            <span class="stat-value">65</span>
+            <span class="stat-value" id="dash-stat-total">--</span>
             <span class="stat-label">TOTAL</span>
           </div>
           <div class="divider"></div>
           <div class="stat">
-            <span class="stat-value">42</span>
+            <span class="stat-value" id="dash-stat-available">--</span>
             <span class="stat-label">AVAILABLE</span>
           </div>
           <div class="divider"></div>
           <div class="stat">
-            <span class="stat-value">23</span>
+            <span class="stat-value" id="dash-stat-rented">--</span>
             <span class="stat-label">RENTED</span>
           </div>
         </div>
 
         <div class="section-header mt-6">
           <h3 class="section-title">UPCOMING RETURN</h3>
-          <span class="badge">1 Due Today</span>
+          <span class="badge" id="dash-upcoming-badge">1 Due Today</span>
         </div>
         
-        <div class="upcoming-card card mt-3">
+        <div class="upcoming-card card mt-3" id="dash-upcoming-card">
           <div class="upcoming-icon">
             <i class="ph ph-calendar-check"></i>
           </div>
           <div class="upcoming-info">
-            <h4>Sharma Wedding</h4>
-            <p>4 Speakers &bull; <span class="due-time">Due 6:00 PM today</span></p>
+            <h4 id="dash-upcoming-title">Sharma Wedding</h4>
+            <p id="dash-upcoming-details">4 Speakers &bull; <span class="due-time" id="dash-upcoming-time">Due 6:00 PM today</span></p>
           </div>
-          <button class="next-btn"><i class="ph ph-caret-right"></i></button>
+          <button class="next-btn" id="dash-btn-upcoming-action" title="Mark Returned"><i class="ph ph-caret-right"></i></button>
         </div>
 
         <div class="quick-inventory card mt-6">
@@ -81,37 +87,18 @@
               <h3>Quick Inventory Status</h3>
               <p class="subtitle">Real-time availability balance</p>
             </div>
-            <a href="#" class="view-all">View All <i class="ph ph-caret-right"></i></a>
+            <a href="#" class="view-all" id="btn-view-all-inventory">View All <i class="ph ph-caret-right"></i></a>
           </div>
 
-          <div class="inventory-item">
-            <div class="item-header">
-              <span class="item-name"><i class="ph ph-speaker-hifi"></i> Speakers</span>
-              <span class="item-count"><strong>10</strong> of 20 available</span>
-            </div>
-            <div class="progress-bar-container"><div class="progress" style="width: 50%"></div></div>
-          </div>
-          
-          <div class="inventory-item">
-            <div class="item-header">
-              <span class="item-name"><i class="ph ph-microphone"></i> Microphones</span>
-              <span class="item-count"><strong>12</strong> of 15 available</span>
-            </div>
-            <div class="progress-bar-container"><div class="progress" style="width: 80%"></div></div>
-          </div>
-
-          <div class="inventory-item">
-            <div class="item-header">
-              <span class="item-name"><i class="ph ph-lightbulb"></i> Stage Lights</span>
-              <span class="item-count"><strong>20</strong> of 30 available</span>
-            </div>
-            <div class="progress-bar-container"><div class="progress" style="width: 66%"></div></div>
+          <div id="dash-quick-inventory-container">
+            <!-- Dynamically populated from backend -->
+            <div class="empty-state"><i class="ph ph-circle-notch ph-spin"></i>Loading live inventory...</div>
           </div>
         </div>
       </div>
       
       <div class="fab-container">
-        <button class="fab">
+        <button class="fab" id="dash-fab-new-rental">
           <i class="ph ph-plus"></i> New Rental
         </button>
       </div>
@@ -130,86 +117,119 @@
 
       <header class="header">
          <h2 class="page-title">Inventory</h2>
-         <button class="icon-btn-light"><i class="ph ph-qr-code"></i></button>
+         <button class="icon-btn-light" id="btn-refresh-inventory" title="Refresh Live Data"><i class="ph ph-arrows-clockwise"></i></button>
       </header>
 
       <div class="content-scroll">
         <div class="search-bar">
           <i class="ph ph-magnifying-glass"></i>
-          <input type="text" placeholder="Search equipment...">
+          <input type="text" id="inv-search-input" placeholder="Search equipment...">
         </div>
 
         <div class="inventory-stats mt-4">
           <div class="stat-card">
             <span class="stat-label">AVAILABLE</span>
-            <span class="stat-value large">42</span>
-            <div class="progress-bar-container thick"><div class="progress" style="width: 65%"></div></div>
+            <span class="stat-value large" id="inv-stat-available">--</span>
+            <div class="progress-bar-container thick"><div class="progress" id="inv-prog-available" style="width: 50%"></div></div>
           </div>
           <div class="stat-card">
             <span class="stat-label">RENTED</span>
-            <span class="stat-value large">23</span>
-            <div class="progress-bar-container thick"><div class="progress" style="width: 35%"></div></div>
+            <span class="stat-value large" id="inv-stat-rented">--</span>
+            <div class="progress-bar-container thick"><div class="progress" id="inv-prog-rented" style="width: 50%"></div></div>
           </div>
         </div>
 
         <div class="filter-tabs mt-6">
-          <button class="filter-tab active">All</button>
-          <button class="filter-tab">Audio</button>
-          <button class="filter-tab">Lighting</button>
+          <button class="filter-tab active" data-category="All">All</button>
+          <button class="filter-tab" data-category="Audio">Audio</button>
+          <button class="filter-tab" data-category="Lighting">Lighting</button>
+          <button class="filter-tab" data-category="FX">FX / Stage</button>
         </div>
 
-        <div class="inventory-list mt-4">
-          <!-- Item 1 -->
-          <div class="list-card card">
-            <img src="speaker.png" alt="Speaker" class="item-img">
-            <div class="item-details">
-              <div class="item-title-row">
-                <h4>JBL EON 15" Speakers</h4>
-                <span class="item-stock"><strong>10</strong> / 20 Avail</span>
-              </div>
-              <div class="progress-bar-container"><div class="progress" style="width: 50%"></div></div>
-            </div>
-          </div>
-          <!-- Item 2 -->
-          <div class="list-card card">
-            <img src="microphone.png" alt="Microphone" class="item-img">
-            <div class="item-details">
-              <div class="item-title-row">
-                <h4>Wireless Microphones (Shure)</h4>
-                <span class="item-stock"><strong>12</strong> / 15 Avail</span>
-              </div>
-              <div class="progress-bar-container"><div class="progress" style="width: 80%"></div></div>
-            </div>
-          </div>
-          <!-- Item 3 -->
-          <div class="list-card card">
-            <img src="lights.png" alt="Lights" class="item-img">
-            <div class="item-details">
-              <div class="item-title-row">
-                <h4>Stage Lights (RGBW DMX)</h4>
-                <span class="item-stock"><strong>20</strong> / 30 Avail</span>
-              </div>
-              <div class="progress-bar-container"><div class="progress" style="width: 66%"></div></div>
-            </div>
-          </div>
-          <!-- Item 4 -->
-          <div class="list-card card">
-            <img src="fog.png" alt="Fog Machine" class="item-img">
-            <div class="item-details">
-              <div class="item-title-row">
-                <h4>Fog & FX Machines</h4>
-                <span class="item-stock"><strong>5</strong> / 8 Avail</span>
-              </div>
-              <div class="progress-bar-container"><div class="progress" style="width: 62.5%"></div></div>
-            </div>
-          </div>
+        <div class="inventory-list mt-4" id="inv-items-list">
+          <!-- Dynamic Items Injected Here -->
+          <div class="empty-state"><i class="ph ph-circle-notch ph-spin"></i>Loading equipment catalog...</div>
         </div>
       </div>
       
       <div class="fab-container">
-        <button class="fab">
+        <button class="fab" id="inv-fab-add-equipment">
           <i class="ph ph-plus"></i> Add Equipment
         </button>
+      </div>
+    </div>
+
+    <!-- RENTALS PAGE -->
+    <div id="rentals-page" class="page">
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <div class="status-icons">
+          <i class="ph-fill ph-cell-signal-full"></i>
+          <i class="ph-fill ph-wifi-high"></i>
+          <i class="ph-fill ph-battery-full"></i>
+        </div>
+      </div>
+
+      <header class="header">
+         <h2 class="page-title">Rentals & Dispatches</h2>
+         <button class="icon-btn-light" id="btn-refresh-rentals" title="Refresh Rentals"><i class="ph ph-arrows-clockwise"></i></button>
+      </header>
+
+      <div class="content-scroll">
+        <div class="filter-tabs mt-2">
+          <button class="filter-tab active" data-rental-filter="ACTIVE">Active Dispatches</button>
+          <button class="filter-tab" data-rental-filter="ALL">All History</button>
+        </div>
+
+        <div class="rentals-list mt-4" id="rentals-items-list">
+          <div class="empty-state"><i class="ph ph-circle-notch ph-spin"></i>Loading dispatches...</div>
+        </div>
+      </div>
+
+      <div class="fab-container">
+        <button class="fab" id="rentals-fab-new">
+          <i class="ph ph-plus"></i> New Rental
+        </button>
+      </div>
+    </div>
+
+    <!-- SETTINGS PAGE -->
+    <div id="settings-page" class="page">
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <div class="status-icons">
+          <i class="ph-fill ph-cell-signal-full"></i>
+          <i class="ph-fill ph-wifi-high"></i>
+          <i class="ph-fill ph-battery-full"></i>
+        </div>
+      </div>
+
+      <header class="header">
+         <h2 class="page-title">Settings</h2>
+      </header>
+
+      <div class="content-scroll">
+        <div class="card mt-2">
+          <h3 style="font-size: 15px; margin-bottom: 8px;">Warehouse Terminal</h3>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Active dispatch station settings</p>
+          <div style="font-size: 13px; line-height: 1.8;">
+            <div><strong>Operator:</strong> <span id="settings-operator-name">Sarah</span></div>
+            <div><strong>Terminal:</strong> <span id="settings-terminal-id">Terminal 07</span></div>
+            <div><strong>Email:</strong> <span id="settings-email">name@rentory.supply</span></div>
+          </div>
+        </div>
+
+        <div class="card mt-4">
+          <h3 style="font-size: 15px; margin-bottom: 8px;">Backend API Connection</h3>
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+            <div id="settings-status-dot" style="width: 10px; height: 10px; border-radius: 50%; background-color: #22c55e;"></div>
+            <span id="settings-status-text" style="font-size: 13px; font-weight: 600; color: #16a34a;">Connected to FastAPI</span>
+          </div>
+          <p style="font-size: 12px; color: var(--text-muted); word-break: break-all;">Endpoint: <code>http://localhost:8000/api</code></p>
+          <button class="btn-primary mt-3" id="btn-reconnect-api" style="padding: 10px; font-size: 13px;">
+            <i class="ph ph-arrows-clockwise"></i> Test Connection
+          </button>
+        </div>
       </div>
     </div>
 
@@ -223,16 +243,81 @@
         <i class="ph ph-archive-box"></i>
         <span>Inventory</span>
       </a>
-      <a href="#" class="nav-item">
+      <a href="#" class="nav-item" data-target="rentals-page">
         <i class="ph ph-calendar-blank"></i>
         <span>Rentals</span>
       </a>
-      <a href="#" class="nav-item">
+      <a href="#" class="nav-item" data-target="settings-page">
         <i class="ph ph-gear"></i>
         <span>Settings</span>
       </a>
       <div class="home-indicator"></div>
     </nav>
+
+    <!-- NEW RENTAL MODAL -->
+    <div id="modal-new-rental" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Create New Rental Dispatch</h3>
+          <button class="modal-close-btn" data-close-modal="modal-new-rental">&times;</button>
+        </div>
+        <form id="form-new-rental">
+          <div class="form-group">
+            <label for="rental-client-name">Client / Event Name</label>
+            <input type="text" id="rental-client-name" class="form-control" placeholder="e.g. Verma Concert / Sharma Wedding" required>
+          </div>
+          <div class="form-group">
+            <label for="rental-item-select">Select Equipment</label>
+            <select id="rental-item-select" class="form-control" required>
+              <option value="">Loading equipment...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="rental-quantity">Quantity to Dispatch</label>
+            <input type="number" id="rental-quantity" class="form-control" min="1" value="1" required>
+          </div>
+          <div class="form-group">
+            <label for="rental-due-time">Return Due Time</label>
+            <input type="text" id="rental-due-time" class="form-control" placeholder="e.g. Due 6:00 PM today / Tomorrow 10 AM" value="Due 6:00 PM today" required>
+          </div>
+          <button type="submit" class="btn-primary">
+            <i class="ph ph-check-circle"></i> Confirm & Dispatch Rental
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ADD EQUIPMENT MODAL -->
+    <div id="modal-add-equipment" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Add New Equipment</h3>
+          <button class="modal-close-btn" data-close-modal="modal-add-equipment">&times;</button>
+        </div>
+        <form id="form-add-equipment">
+          <div class="form-group">
+            <label for="equip-name">Equipment Name</label>
+            <input type="text" id="equip-name" class="form-control" placeholder="e.g. Shure SM58 Mic / Beam Moving Head" required>
+          </div>
+          <div class="form-group">
+            <label for="equip-category">Category</label>
+            <select id="equip-category" class="form-control" required>
+              <option value="Audio">Audio</option>
+              <option value="Lighting">Lighting</option>
+              <option value="FX">FX / Stage</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="equip-total">Total Stock Quantity</label>
+            <input type="number" id="equip-total" class="form-control" min="1" value="10" required>
+          </div>
+          <button type="submit" class="btn-primary">
+            <i class="ph ph-plus-circle"></i> Add to Warehouse Stock
+          </button>
+        </form>
+      </div>
+    </div>
+
   </div>
   <script src="script.js"></script>
 </body>
