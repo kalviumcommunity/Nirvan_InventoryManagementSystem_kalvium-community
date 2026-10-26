@@ -7,6 +7,7 @@ class InventoryItem(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True, nullable=False)
+    short_name = Column(String, nullable=True)
     category = Column(String, index=True, default="Audio")
     total = Column(Integer, default=0, nullable=False)
     available = Column(Integer, default=0, nullable=False)

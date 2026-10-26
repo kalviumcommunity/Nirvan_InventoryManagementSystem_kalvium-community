@@ -13,5 +13,8 @@ class Rental(Base):
     due_time = Column(String, default="Due 6:00 PM today")
     due_date = Column(String, nullable=True)
     status = Column(String, default="ACTIVE", index=True) # "ACTIVE", "RETURNED"
+    phone = Column(String, nullable=True)
+    contact = Column(String, nullable=True)
+    is_urgent = Column(Integer, default=0)
     notes = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)

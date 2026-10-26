@@ -75,12 +75,19 @@ def get_dashboard_summary(db: Session = Depends(get_db)):
         "upcomingReturn": primary_return,
         "upcomingReturns": [
             {
-                "id": r.id,
+                "id": str(r.id),
+                "client": r.client_name,
                 "clientName": r.client_name,
+                "equipId": str(r.item_id),
+                "itemId": r.item_id,
+                "equipName": r.item_name,
                 "itemName": r.item_name,
+                "units": r.quantity,
                 "quantity": r.quantity,
                 "dueTime": r.due_time,
-                "status": r.status
+                "dueText": r.due_time,
+                "status": r.status.lower(),
+                "isUrgent": r.is_urgent == 1
             }
             for r in active_rentals
         ],

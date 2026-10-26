@@ -45,6 +45,7 @@ def create_inventory_item(payload: InventoryItemCreate, db: Session = Depends(ge
 
     item = InventoryItem(
         name=payload.name,
+        short_name=payload.short_name or payload.name,
         category=payload.category,
         total=payload.total,
         available=payload.total,

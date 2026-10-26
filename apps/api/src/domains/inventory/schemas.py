@@ -4,6 +4,7 @@ from datetime import datetime
 
 class InventoryItemBase(BaseModel):
     name: str
+    short_name: Optional[str] = None
     category: str = "Audio"
     total: int = 10
     image_url: Optional[str] = "speaker.png"
@@ -16,6 +17,7 @@ class InventoryItemCreate(InventoryItemBase):
 
 class InventoryItemUpdate(BaseModel):
     name: Optional[str] = None
+    short_name: Optional[str] = None
     category: Optional[str] = None
     total: Optional[int] = None
     available: Optional[int] = None

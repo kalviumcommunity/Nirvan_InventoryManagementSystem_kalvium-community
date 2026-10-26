@@ -41,6 +41,7 @@ def seed_database():
             items = [
                 InventoryItem(
                     name='JBL EON 15" Speakers',
+                    short_name="Speakers",
                     category="Audio",
                     total=20,
                     available=10,
@@ -52,6 +53,7 @@ def seed_database():
                 ),
                 InventoryItem(
                     name="Wireless Microphones (Shure)",
+                    short_name="Microphones",
                     category="Audio",
                     total=15,
                     available=12,
@@ -63,6 +65,7 @@ def seed_database():
                 ),
                 InventoryItem(
                     name="Stage Lights (RGBW DMX)",
+                    short_name="Stage Lights",
                     category="Lighting",
                     total=30,
                     available=20,
@@ -74,6 +77,7 @@ def seed_database():
                 ),
                 InventoryItem(
                     name="Fog & FX Machines",
+                    short_name="Fog & FX Machines",
                     category="FX",
                     total=8,
                     available=5,
@@ -87,20 +91,91 @@ def seed_database():
             db.add_all(items)
             db.commit()
 
-            # Seed initial active rental
+            # Seed initial active & history rentals
             speaker_item = db.query(InventoryItem).filter(InventoryItem.name.ilike('%speaker%')).first()
+            mic_item = db.query(InventoryItem).filter(InventoryItem.name.ilike('%microphone%')).first()
+            light_item = db.query(InventoryItem).filter(InventoryItem.name.ilike('%light%')).first()
+
+            rentals = []
             if speaker_item:
-                rental = Rental(
-                    client_name="Sharma Wedding",
-                    item_id=speaker_item.id,
-                    item_name=speaker_item.name,
-                    quantity=4,
-                    due_time="Due 6:00 PM today",
-                    status="ACTIVE",
-                    notes="Reception main stage audio setup"
+                rentals.extend([
+                    Rental(
+                        client_name="Sharma Wedding",
+                        item_id=speaker_item.id,
+                        item_name=speaker_item.name,
+                        quantity=4,
+                        due_time="Due today 6 PM",
+                        due_date="21 Sep 2025, 06:00 PM",
+                        phone="+91 98201 55432",
+                        contact="Rahul Sharma (+91 98402 11920)",
+                        is_urgent=1,
+                        status="ACTIVE",
+                        notes="Reception main stage audio setup"
+                    ),
+                    Rental(
+                        client_name="ABC Events",
+                        item_id=speaker_item.id,
+                        item_name=speaker_item.name,
+                        quantity=3,
+                        due_time="Due 22 Sep",
+                        due_date="22 Sep 2025, 05:00 PM",
+                        phone="+91 98111 22334",
+                        contact="Anita Gupta (+91 98111 22334)",
+                        is_urgent=0,
+                        status="ACTIVE",
+                        notes="Conference breakout audio"
+                    ),
+                    Rental(
+                        client_name="Royal Events",
+                        item_id=speaker_item.id,
+                        item_name=speaker_item.name,
+                        quantity=3,
+                        due_time="Due 23 Sep",
+                        due_date="23 Sep 2025, 08:00 PM",
+                        phone="+91 98765 43210",
+                        contact="Vikram Malhotra (+91 98765 43210)",
+                        is_urgent=0,
+                        status="ACTIVE",
+                        notes="VIP banquet hall setup"
+                    )
+                ])
+
+            if light_item:
+                rentals.append(
+                    Rental(
+                        client_name="Nexus Tech Summit",
+                        item_id=light_item.id,
+                        item_name=light_item.name,
+                        quantity=6,
+                        due_time="Due 24 Sep",
+                        due_date="24 Sep 2025, 10:00 PM",
+                        phone="+91 98333 44556",
+                        contact="Pooja Iyer (+91 98333 44556)",
+                        is_urgent=0,
+                        status="ACTIVE",
+                        notes="Keynote stage lighting"
+                    )
                 )
-                db.add(rental)
-                db.commit()
+
+            if mic_item:
+                rentals.append(
+                    Rental(
+                        client_name="City Hall Gala",
+                        item_id=mic_item.id,
+                        item_name=mic_item.name,
+                        quantity=3,
+                        due_time="Completed",
+                        due_date="20 Sep 2025, 02:00 PM",
+                        phone="+91 98444 55667",
+                        contact="Karan Mehra (+91 98444 55667)",
+                        is_urgent=0,
+                        status="RETURNED",
+                        notes="Podium speech wireless microphones"
+                    )
+                )
+
+            db.add_all(rentals)
+            db.commit()
     finally:
         db.close()
 
