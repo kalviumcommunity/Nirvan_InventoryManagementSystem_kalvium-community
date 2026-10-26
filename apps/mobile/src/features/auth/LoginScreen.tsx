@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Switch, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Switch, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
+import { API_URL } from '../../store/mockData';
 
 interface LoginScreenProps {
   terminalId?: string;
@@ -14,6 +15,29 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   const [password, setPassword] = useState('');
   const [isLoginTab, setIsLoginTab] = useState(true);
   const [rememberMe, setRememberMe] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    const userEmail = email.trim() || 'name@rentory.supply';
+    setSubmitting(true);
+    try {
+      const endpoint = isLoginTab ? `${API_URL}/auth/login` : `${API_URL}/auth/signup`;
+      await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: userEmail,
+          password: password,
+          terminal_id: terminalId
+        })
+      });
+    } catch (e) {
+      console.log('Auth API offline, continuing with local session:', e);
+    } finally {
+      setSubmitting(false);
+      onLogin(userEmail);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -85,10 +109,18 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
              </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.loginButton} onPress={() => onLogin(email)}>
-             <Text style={styles.loginButtonText}>
-               {isLoginTab ? 'Log In to Inventory →' : 'Sign Up →'}
-             </Text>
+          <TouchableOpacity 
+            style={[styles.loginButton, submitting && { opacity: 0.7 }]} 
+            onPress={handleSubmit}
+            disabled={submitting}
+          >
+             {submitting ? (
+               <ActivityIndicator color="white" />
+             ) : (
+               <Text style={styles.loginButtonText}>
+                 {isLoginTab ? 'Log In to Inventory →' : 'Sign Up →'}
+               </Text>
+             )}
           </TouchableOpacity>
 
           <View style={styles.dividerRow}>

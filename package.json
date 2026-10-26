@@ -1,3 +1,14 @@
 {
-  "_comment": "Root workspace dependencies and scripts"
+  "name": "nirvan-inventory-management-system",
+  "private": true,
+  "scripts": {
+    "start": "npm --prefix apps/mobile start",
+    "mobile": "npm --prefix apps/mobile start",
+    "mobile:android": "npm --prefix apps/mobile run android",
+    "mobile:web": "npm --prefix apps/mobile run web",
+    "web": "npx serve apps/web",
+    "api": "python apps/api/src/main.py",
+    "server": "python apps/api/src/main.py",
+    "dev": "npm --prefix apps/mobile start"
+  }
 }
