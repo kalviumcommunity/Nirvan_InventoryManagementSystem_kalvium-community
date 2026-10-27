@@ -4,7 +4,7 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  const API_BASE = 'http://localhost:8000/api';
+  const API_BASE = window.RENTORY_API_URL || 'http://localhost:8000/api';
   let isBackendConnected = false;
 
   // --- DEFAULT DATA TEMPLATE (Fallback / Offline State) ---

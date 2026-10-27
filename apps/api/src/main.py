@@ -184,12 +184,6 @@ async def lifespan(app: FastAPI):
     seed_database()
     yield
 
-# Also seed on startup
-try:
-    seed_database()
-except Exception as e:
-    print(f"Initial DB seed warning: {e}")
-
 app = FastAPI(
     title=settings.PROJECT_NAME,
     lifespan=lifespan,
@@ -199,8 +193,8 @@ app = FastAPI(
 # Configure CORS for Web dashboard, Mobile Expo, and local networks
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=settings.CORS_ORIGINS,
+    allow_credentials=settings.CORS_ORIGINS != ["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
