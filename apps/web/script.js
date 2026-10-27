@@ -152,11 +152,12 @@ document.addEventListener('DOMContentLoaded', () => {
     ],
     selectedEquipId: '1',
     currentEditingRentalId: '1',
-    historyStack: ['inventory-page']
+    historyStack: ['dashboard-page'],
+    isAuthenticated: true
   };
 
   // --- LOCAL STORAGE CONTROLLER ---
-  const STORAGE_KEY = 'rentory_ims_data_v3';
+  const STORAGE_KEY = 'rentory_ims_data_v4';
   let state = loadState();
 
   function loadState() {
@@ -170,7 +171,8 @@ document.addEventListener('DOMContentLoaded', () => {
           settings: { ...DEFAULT_DATA.settings, ...(parsed.settings || {}) },
           inventory: { ...DEFAULT_DATA.inventory, ...(parsed.inventory || {}) },
           rentals: parsed.rentals && parsed.rentals.length ? parsed.rentals : DEFAULT_DATA.rentals,
-          historyStack: ['inventory-page']
+          isAuthenticated: parsed.isAuthenticated !== undefined ? parsed.isAuthenticated : true,
+          historyStack: ['dashboard-page']
         };
       }
     } catch (e) {
@@ -186,7 +188,8 @@ document.addEventListener('DOMContentLoaded', () => {
         inventory: state.inventory,
         rentals: state.rentals,
         selectedEquipId: state.selectedEquipId,
-        currentEditingRentalId: state.currentEditingRentalId
+        currentEditingRentalId: state.currentEditingRentalId,
+        isAuthenticated: state.isAuthenticated
       }));
     } catch (e) {
       console.warn('Failed to persist local cache:', e);
@@ -326,13 +329,14 @@ document.addEventListener('DOMContentLoaded', () => {
       targetPage.classList.add('active');
     }
 
-    const isDetailPage = ['equipment-details-page', 'add-rental-page', 'edit-rental-page'].includes(targetPageId);
+    const isDetailPage = ['login-page', 'equipment-details-page', 'add-rental-page', 'edit-rental-page'].includes(targetPageId);
     if (bottomNav) {
       bottomNav.style.display = isDetailPage ? 'none' : 'flex';
     }
     if (!isDetailPage) {
       updateBottomNavActive(targetPageId);
     }
+    updateTopChipsActive(targetPageId);
 
     if (targetPageId === 'inventory-page') renderInventory();
     if (targetPageId === 'rentals-page') renderRentalsTab();
@@ -341,13 +345,25 @@ document.addEventListener('DOMContentLoaded', () => {
     if (targetPageId === 'equipment-details-page') renderEquipmentDetails(state.selectedEquipId);
   }
 
+  function updateTopChipsActive(pageId) {
+    const chips = document.querySelectorAll('.jump-chip');
+    chips.forEach(chip => {
+      const target = chip.getAttribute('data-page');
+      if (target === pageId) {
+        chip.classList.add('active');
+      } else {
+        chip.classList.remove('active');
+      }
+    });
+  }
+
   function goBack() {
     if (state.historyStack.length > 1) {
       state.historyStack.pop();
       const prevPageId = state.historyStack[state.historyStack.length - 1];
       navigateTo(prevPageId, false);
     } else {
-      navigateTo('inventory-page', false);
+      navigateTo(state.isAuthenticated ? 'dashboard-page' : 'login-page', false);
     }
   }
 
@@ -1395,7 +1411,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnLogout = document.getElementById('btn-logout');
   if (btnLogout) {
     btnLogout.addEventListener('click', () => {
+      state.isAuthenticated = false;
+      saveState();
       showToast(`User ${state.settings.userName} signed out`, 'ph-sign-out');
+      state.historyStack = ['login-page'];
+      navigateTo('login-page', false);
     });
   }
 
@@ -1618,6 +1638,412 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // --- 0) AUTH / LOGIN SCREEN CONTROLLER ---
+  let isLoginTab = true;
+  const tabLogin = document.getElementById('tab-login-btn');
+  const tabSignup = document.getElementById('tab-signup-btn');
+  const loginHeading = document.getElementById('login-heading');
+  const loginSubheading = document.getElementById('login-subheading');
+  const authBtnText = document.getElementById('auth-btn-text');
+
+  if (tabLogin && tabSignup) {
+    tabLogin.addEventListener('click', () => {
+      isLoginTab = true;
+      tabLogin.classList.add('active');
+      tabSignup.classList.remove('active');
+      if (loginHeading) loginHeading.textContent = 'Welcome back';
+      if (loginSubheading) loginSubheading.textContent = 'Rentory Inventory & Equipment Terminal';
+      if (authBtnText) authBtnText.innerHTML = 'Log In to Inventory &rarr;';
+    });
+
+    tabSignup.addEventListener('click', () => {
+      isLoginTab = false;
+      tabSignup.classList.add('active');
+      tabLogin.classList.remove('active');
+      if (loginHeading) loginHeading.textContent = 'Create Account';
+      if (loginSubheading) loginSubheading.textContent = 'Register new operator terminal badge';
+      if (authBtnText) authBtnText.innerHTML = 'Sign Up & Enter Terminal &rarr;';
+    });
+  }
+
+  // Toggle password visibility
+  const btnTogglePwd = document.getElementById('btn-toggle-pwd');
+  const pwdInput = document.getElementById('login-password');
+  const iconPwdEye = document.getElementById('icon-pwd-eye');
+  if (btnTogglePwd && pwdInput) {
+    btnTogglePwd.addEventListener('click', () => {
+      const isPwd = pwdInput.type === 'password';
+      pwdInput.type = isPwd ? 'text' : 'password';
+      if (iconPwdEye) {
+        iconPwdEye.className = isPwd ? 'ph ph-eye-slash' : 'ph ph-eye';
+      }
+    });
+  }
+
+  // Auth Submit & Login
+  const authForm = document.getElementById('auth-form');
+  const btnSubmitAuth = document.getElementById('btn-submit-auth');
+
+  function handleAuthSubmit() {
+    const emailInput = document.getElementById('login-email');
+    const email = emailInput?.value.trim() || 'name@rentory.supply';
+
+    if (btnSubmitAuth) {
+      btnSubmitAuth.disabled = true;
+      btnSubmitAuth.innerHTML = '<i class="ph ph-circle-notch" style="animation: spin 0.7s linear infinite;"></i> Authenticating...';
+    }
+
+    setTimeout(() => {
+      if (btnSubmitAuth) {
+        btnSubmitAuth.disabled = false;
+        btnSubmitAuth.innerHTML = '<span id="auth-btn-text">' + (isLoginTab ? 'Log In to Inventory &rarr;' : 'Sign Up & Enter Terminal &rarr;') + '</span>';
+      }
+      state.isAuthenticated = true;
+      if (email.includes('@')) {
+        const rawName = email.split('@')[0];
+        const formattedName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+        if (formattedName && formattedName !== 'Name') {
+          state.settings.userName = formattedName;
+        }
+      }
+      saveState();
+      showToast('Authenticated • Terminal 07 Ready!', 'ph-check-circle');
+      navigateTo('dashboard-page');
+    }, 350);
+  }
+
+  if (btnSubmitAuth) {
+    btnSubmitAuth.addEventListener('click', (e) => {
+      e.preventDefault();
+      handleAuthSubmit();
+    });
+  }
+  if (authForm) {
+    authForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      handleAuthSubmit();
+    });
+  }
+
+  // SSO Fast Access buttons
+  const ssoGoogle = document.getElementById('sso-google');
+  const ssoApple = document.getElementById('sso-apple');
+  const ssoKey = document.getElementById('sso-key');
+  [ssoGoogle, ssoApple, ssoKey].forEach(btn => {
+    if (btn) {
+      btn.addEventListener('click', () => {
+        state.isAuthenticated = true;
+        saveState();
+        showToast('SSO Verified • Fast Access Granted', 'ph-fingerprint');
+        navigateTo('dashboard-page');
+      });
+    }
+  });
+
+  const btnForgotPwd = document.getElementById('btn-forgot-password');
+  if (btnForgotPwd) {
+    btnForgotPwd.addEventListener('click', (e) => {
+      e.preventDefault();
+      showToast('Password reset link sent to admin terminal', 'ph-paper-plane-tilt');
+    });
+  }
+
+  // --- DESKTOP SCREEN SWITCHER / JUMP CHIPS ---
+  const jumpChips = document.querySelectorAll('.jump-chip');
+  jumpChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const pageId = chip.getAttribute('data-page');
+      if (pageId) {
+        if (pageId !== 'login-page') {
+          state.isAuthenticated = true;
+        }
+        navigateTo(pageId);
+      }
+    });
+  });
+
+  // View Mode: Interactive Phone vs 7 Screens Panoramic Showcase
+  const btnViewPhone = document.getElementById('btn-view-phone');
+  const btnViewShowcase = document.getElementById('btn-view-showcase');
+  const btnReturnPhone = document.getElementById('btn-return-phone-view');
+  const appContainer = document.getElementById('app-container');
+  const panoramicShowcase = document.getElementById('panoramic-showcase');
+
+  function setViewMode(mode) {
+    const viewportWrapper = document.querySelector('.viewport-wrapper');
+    if (mode === 'showcase') {
+      if (appContainer) appContainer.style.display = 'none';
+      if (viewportWrapper) viewportWrapper.classList.add('showcase-mode');
+      if (panoramicShowcase) {
+        panoramicShowcase.style.display = 'flex';
+        renderPanoramicShowcase();
+      }
+      if (btnViewShowcase) btnViewShowcase.classList.add('active');
+      if (btnViewPhone) btnViewPhone.classList.remove('active');
+    } else {
+      if (panoramicShowcase) panoramicShowcase.style.display = 'none';
+      if (viewportWrapper) viewportWrapper.classList.remove('showcase-mode');
+      if (appContainer) appContainer.style.display = '';
+      if (btnViewPhone) btnViewPhone.classList.add('active');
+      if (btnViewShowcase) btnViewShowcase.classList.remove('active');
+    }
+  }
+
+  if (btnViewPhone) btnViewPhone.addEventListener('click', () => setViewMode('phone'));
+  if (btnViewShowcase) btnViewShowcase.addEventListener('click', () => setViewMode('showcase'));
+  if (btnReturnPhone) btnReturnPhone.addEventListener('click', () => setViewMode('phone'));
+
+  // --- PANORAMIC 7 SCREENS SHOWCASE RENDERER ---
+  function renderPanoramicShowcase() {
+    const track = document.getElementById('showcase-screens-track');
+    if (!track) return;
+    track.innerHTML = '';
+
+    const firstEquip = state.inventory[state.selectedEquipId] || Object.values(state.inventory)[0];
+    const urgentRental = state.rentals.find(r => r.status === 'active' && r.isUrgent) || state.rentals[0];
+
+    let totalAvail = 0;
+    let totalRented = 0;
+    Object.values(state.inventory).forEach(item => {
+      totalAvail += (item.available || 0);
+      totalRented += (item.rented || 0);
+    });
+
+    const screens = [
+      {
+        id: 'login-page',
+        label: 'Html → Body',
+        name: 'Login Terminal',
+        html: `
+          <div style="padding: 16px 20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+              <span style="font-weight:700; font-size:15px; display:flex; align-items:center; gap:6px;">📦 Rentory •</span>
+              <span style="font-size:10px; background:#E8EDE9; color:#4C5D51; padding:3px 8px; border-radius:12px; font-weight:600;">🟢 Terminal 07</span>
+            </div>
+            <h2 style="font-size:22px; font-weight:700; margin-bottom:4px;">Welcome back</h2>
+            <p style="font-size:11px; color:#6B7280; margin-bottom:16px;">Rentory Inventory & Equipment Terminal</p>
+            <div style="display:flex; background:#E5E7EB; border-radius:10px; padding:3px; margin-bottom:16px;">
+              <span style="flex:1; text-align:center; padding:6px; font-size:11px; font-weight:600; background:#4C5D51; color:#fff; border-radius:8px;">Log In</span>
+              <span style="flex:1; text-align:center; padding:6px; font-size:11px; font-weight:600; color:#6B7280;">Sign Up</span>
+            </div>
+            <div style="margin-bottom:12px;">
+              <span style="font-size:11px; color:#6B7280;">Work Email</span>
+              <div style="background:#fff; border:1px solid #E5E7EB; border-radius:10px; padding:8px 12px; font-size:12px; margin-top:4px;">name@rentory.supply</div>
+            </div>
+            <div style="margin-bottom:16px;">
+              <span style="font-size:11px; color:#6B7280;">Password</span>
+              <div style="background:#fff; border:1px solid #E5E7EB; border-radius:10px; padding:8px 12px; font-size:12px; margin-top:4px;">••••••••••••</div>
+            </div>
+            <div style="background:#4C5D51; color:#fff; text-align:center; padding:12px; border-radius:12px; font-weight:600; font-size:13px; margin-top:20px;">Log In to Inventory &rarr;</div>
+            <p style="text-align:center; font-size:10px; color:#9CA3AF; margin-top:28px;">🔒 Secure warehouse & fleet ledger</p>
+          </div>
+        `
+      },
+      {
+        id: 'dashboard-page',
+        label: 'Html → Body',
+        name: 'Dashboard',
+        html: `
+          <div style="padding: 16px 20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+              <span style="font-weight:700; font-size:16px;">📦 Rentory</span>
+              <span style="width:28px; height:28px; border-radius:50%; background:#E8EDE9; display:inline-flex; align-items:center; justify-content:center; color:#4C5D51;"><i class="ph ph-magnifying-glass"></i></span>
+            </div>
+            <p style="font-size:11px; color:#6B7280; margin-bottom:2px;">Monday, 20 Sep</p>
+            <h3 style="font-size:18px; font-weight:700; margin-bottom:14px;">Good morning, ${state.settings.userName.split(' ')[0]}</h3>
+            <div style="display:flex; justify-content:space-between; background:#fff; padding:12px; border-radius:14px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.03); margin-bottom:14px;">
+              <div><strong style="font-size:16px;">${totalAvail + totalRented}</strong><br><span style="font-size:9px; color:#9CA3AF;">TOTAL</span></div>
+              <div><strong style="font-size:16px; color:#4C5D51;">${totalAvail}</strong><br><span style="font-size:9px; color:#9CA3AF;">AVAILABLE</span></div>
+              <div><strong style="font-size:16px;">${totalRented}</strong><br><span style="font-size:9px; color:#9CA3AF;">RENTED</span></div>
+            </div>
+            <div style="background:#fff; border-radius:12px; padding:10px 12px; margin-bottom:12px; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+              <span style="font-size:10px; font-weight:700; color:#4C5D51;">UPCOMING RETURN</span>
+              <p style="font-size:12px; font-weight:700; margin-top:4px;">${urgentRental ? urgentRental.client : 'Sharma Wedding'}</p>
+              <p style="font-size:10px; color:#6B7280;">${urgentRental ? urgentRental.units : '4'} Speakers • Due 6:00 PM today</p>
+            </div>
+            <div style="background:#4C5D51; color:#fff; text-align:center; padding:10px; border-radius:10px; font-weight:600; font-size:12px; margin-top:14px;">+ New Rental</div>
+          </div>
+        `
+      },
+      {
+        id: 'inventory-page',
+        label: 'Inventory',
+        name: 'Inventory Catalog',
+        html: `
+          <div style="padding: 16px 20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+              <h3 style="font-size:18px; font-weight:700;">Inventory</h3>
+              <i class="ph ph-qr-code" style="font-size:18px;"></i>
+            </div>
+            <div style="background:#fff; border-radius:10px; padding:8px 12px; font-size:12px; color:#9CA3AF; margin-bottom:12px;">🔍 Search equipment...</div>
+            <div style="display:flex; gap:10px; margin-bottom:14px;">
+              <div style="flex:1; background:#fff; padding:10px; border-radius:12px; text-align:center;"><span style="font-size:9px; color:#9CA3AF;">AVAILABLE</span><br><strong style="font-size:16px;">${totalAvail}</strong></div>
+              <div style="flex:1; background:#fff; padding:10px; border-radius:12px; text-align:center;"><span style="font-size:9px; color:#9CA3AF;">RENTED</span><br><strong style="font-size:16px;">${totalRented}</strong></div>
+            </div>
+            <div style="display:flex; gap:6px; margin-bottom:12px;">
+              <span style="background:#4C5D51; color:#fff; font-size:10px; padding:4px 10px; border-radius:10px; font-weight:600;">All</span>
+              <span style="background:#E5E7EB; color:#4B5563; font-size:10px; padding:4px 10px; border-radius:10px;">Audio</span>
+              <span style="background:#E5E7EB; color:#4B5563; font-size:10px; padding:4px 10px; border-radius:10px;">Lighting</span>
+            </div>
+            <div style="background:#fff; border-radius:12px; padding:10px; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+              <img src="speaker.png" style="width:32px; height:32px; border-radius:6px; object-fit:contain;">
+              <div style="flex:1;"><p style="font-size:11px; font-weight:700; margin:0;">JBL EON 15" Speakers</p><span style="font-size:10px; color:#6B7280;">10 / 20 Avail</span></div>
+            </div>
+            <div style="background:#fff; border-radius:12px; padding:10px; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+              <img src="microphone.png" style="width:32px; height:32px; border-radius:6px; object-fit:contain;">
+              <div style="flex:1;"><p style="font-size:11px; font-weight:700; margin:0;">Wireless Mics (Shure)</p><span style="font-size:10px; color:#6B7280;">12 / 15 Avail</span></div>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 'settings-page',
+        label: '8) Settings (Clean)',
+        name: 'Settings & Logistics',
+        html: `
+          <div style="padding: 16px 20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 14px;">
+              <h3 style="font-size:18px; font-weight:700;">Settings</h3>
+              <i class="ph ph-arrow-up-right" style="font-size:16px;"></i>
+            </div>
+            <div style="background:#fff; border-radius:12px; padding:12px; display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+              <img src="sarah.jpg" style="width:36px; height:36px; border-radius:50%; object-fit:cover;">
+              <div>
+                <strong style="font-size:13px;">${state.settings.userName}</strong>
+                <p style="font-size:10px; color:#6B7280; margin:0;">${state.settings.userRole}</p>
+                <p style="font-size:9px; color:#9CA3AF; margin:0;">${state.settings.userCompany}</p>
+              </div>
+            </div>
+            <div style="background:#fff; border-radius:12px; padding:10px 12px; margin-bottom:12px;">
+              <p style="font-size:11px; font-weight:600; margin:0;">${state.settings.hubName}</p>
+              <p style="font-size:10px; color:#6B7280; margin:0;">${state.settings.hubSub}</p>
+              <hr style="border:0; border-top:1px solid #f3f4f6; margin:6px 0;">
+              <p style="font-size:11px; font-weight:600; margin:0;">Gate Access Hours</p>
+              <p style="font-size:10px; color:#6B7280; margin:0;">${state.settings.gateHours}</p>
+            </div>
+            <div style="border:1.5px solid #FECACA; color:#EF4444; border-radius:12px; padding:10px; text-align:center; font-size:12px; font-weight:600; margin-top:20px;">
+              <i class="ph ph-sign-out"></i> Log Out
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 'add-rental-page',
+        label: '6) Add Rental (Clean)',
+        name: 'New Rental Dispatch',
+        html: `
+          <div style="padding: 16px 20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 14px;">
+              <span style="font-weight:700; font-size:15px;">&larr; New Rental</span>
+              <span style="font-size:9px; background:#E8EDE9; color:#4C5D51; padding:2px 6px; border-radius:10px; font-weight:600;">Active Step</span>
+            </div>
+            <div style="background:#fff; border:1px solid #E5E7EB; border-radius:12px; padding:10px 12px; margin-bottom:12px;">
+              <strong style="font-size:12px;">Speakers (JBL 15")</strong>
+              <p style="font-size:10px; color:#6B7280; margin:0;">10 available</p>
+            </div>
+            <div style="margin-bottom:10px;">
+              <span style="font-size:10px; color:#6B7280;">Quantity: <strong>4</strong></span>
+            </div>
+            <div style="margin-bottom:10px;">
+              <span style="font-size:10px; color:#6B7280;">Client / Event</span>
+              <div style="background:#fff; border:1px solid #E5E7EB; border-radius:8px; padding:6px 10px; font-size:11px; margin-top:2px;">Sharma Wedding</div>
+            </div>
+            <div style="margin-bottom:12px;">
+              <span style="font-size:10px; color:#6B7280;">Return Date</span>
+              <div style="background:#fff; border:1px solid #E5E7EB; border-radius:8px; padding:6px 10px; font-size:11px; margin-top:2px;">21 Sep 2026, 06:00 PM</div>
+            </div>
+            <div style="background:#4C5D51; color:#fff; text-align:center; padding:10px; border-radius:10px; font-weight:600; font-size:12px; margin-top:14px;">Confirm Rental</div>
+          </div>
+        `
+      },
+      {
+        id: 'equipment-details-page',
+        label: '5) Equipment Details (Clean)',
+        name: 'Equipment Stock Detail',
+        html: `
+          <div style="padding: 16px 20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+              <span style="font-weight:700; font-size:15px;">&larr; ${firstEquip ? firstEquip.shortName : 'Speakers'}</span>
+              <i class="ph ph-dots-three-vertical"></i>
+            </div>
+            <div style="display:flex; justify-content:space-between; background:#fff; padding:12px; border-radius:14px; text-align:center; margin-bottom:14px;">
+              <div><strong style="font-size:16px;">${firstEquip ? firstEquip.total : 20}</strong><br><span style="font-size:9px; color:#9CA3AF;">Total</span></div>
+              <div><strong style="font-size:16px; color:#4C5D51;">${firstEquip ? firstEquip.available : 10}</strong><br><span style="font-size:9px; color:#9CA3AF;">Available</span></div>
+              <div><strong style="font-size:16px;">${firstEquip ? firstEquip.rented : 10}</strong><br><span style="font-size:9px; color:#9CA3AF;">Rented</span></div>
+            </div>
+            <h4 style="font-size:11px; font-weight:700; color:#374151; margin-bottom:8px;">Currently Rented</h4>
+            <div style="background:#fff; border-radius:10px; padding:8px 10px; margin-bottom:6px; display:flex; justify-content:space-between;">
+              <div><strong style="font-size:11px;">Sharma Wedding</strong><br><span style="font-size:9px; color:#DC2626;">Due today 6 PM</span></div>
+              <span style="font-size:11px; font-weight:600;">4 units</span>
+            </div>
+            <div style="background:#fff; border-radius:10px; padding:8px 10px; margin-bottom:12px; display:flex; justify-content:space-between;">
+              <div><strong style="font-size:11px;">ABC Events</strong><br><span style="font-size:9px; color:#6B7280;">Due 22 Sep</span></div>
+              <span style="font-size:11px; font-weight:600;">3 units</span>
+            </div>
+            <div style="background:#4C5D51; color:#fff; text-align:center; padding:10px; border-radius:10px; font-weight:600; font-size:12px; margin-top:14px;">+ Rent Out Units</div>
+          </div>
+        `
+      },
+      {
+        id: 'edit-rental-page',
+        label: '7) Edit Rental (Clean)',
+        name: 'Rental Record Details',
+        html: `
+          <div style="padding: 16px 20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+              <span style="font-weight:700; font-size:14px;">&larr; Rental #RN-8042</span>
+              <span style="font-size:9px; background:#DCFCE7; color:#166534; padding:2px 6px; border-radius:8px; font-weight:600;">Active</span>
+            </div>
+            <div style="background:#fff; border-radius:12px; padding:12px; margin-bottom:12px;">
+              <strong style="font-size:13px;">Sharma Wedding</strong>
+              <p style="font-size:10px; color:#4C5D51; margin:2px 0 6px 0;">4x JBL EON 15" Speakers</p>
+              <p style="font-size:9px; color:#6B7280; margin:0;">20 Sep, 10:30 AM &rarr; 21 Sep, 06:00 PM</p>
+            </div>
+            <div style="background:#fff; border-radius:12px; padding:10px 12px; margin-bottom:14px;">
+              <p style="font-size:10px; color:#9CA3AF; margin:0;">QUANTITY ON SITE: <strong>4</strong></p>
+              <hr style="border:0; border-top:1px solid #f3f4f6; margin:6px 0;">
+              <p style="font-size:10px; color:#6B7280; margin:0;">Rahul Sharma (+91 98402 11920)</p>
+            </div>
+            <div style="background:#4C5D51; color:#fff; text-align:center; padding:10px; border-radius:10px; font-weight:600; font-size:12px; margin-bottom:8px;">Mark Units as Returned</div>
+            <div style="border:1px solid #E5E7EB; text-align:center; padding:8px; border-radius:10px; font-size:11px; font-weight:600;">Save Changes</div>
+          </div>
+        `
+      }
+    ];
+
+    screens.forEach(screen => {
+      const card = document.createElement('div');
+      card.className = 'showcase-screen-card';
+      card.innerHTML = `
+        <div class="showcase-screen-label">${screen.label}</div>
+        <div class="showcase-phone-mockup" data-page="${screen.id}" title="Click to open ${screen.name}">
+          <div class="status-bar" style="padding: 8px 16px 4px 16px;">
+            <span class="time" style="font-size: 11px;">9:41</span>
+            <div class="notch-pill" style="width: 50px; height: 10px;"></div>
+            <div class="status-icons" style="font-size: 12px;">
+              <i class="ph-fill ph-cell-signal-full"></i>
+              <i class="ph-fill ph-wifi-high"></i>
+              <i class="ph-fill ph-battery-full"></i>
+            </div>
+          </div>
+          <div class="showcase-screen-content">
+            ${screen.html}
+          </div>
+          <div class="home-indicator" style="bottom: 6px; width: 80px; height: 3px;"></div>
+        </div>
+      `;
+
+      card.querySelector('.showcase-phone-mockup').addEventListener('click', () => {
+        setViewMode('phone');
+        if (screen.id !== 'login-page') state.isAuthenticated = true;
+        navigateTo(screen.id);
+        showToast(`Switched to ${screen.name}`, 'ph-device-mobile');
+      });
+
+      track.appendChild(card);
+    });
+  }
+
   // --- RENDER ALL & BOOTSTRAP ---
   function renderAll() {
     renderInventory();
@@ -1629,6 +2055,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial render with cached/default data
   renderAll();
 
-  // Connect live to FastAPI
+  // Initial boot page
+  if (!state.isAuthenticated) {
+    navigateTo('login-page', false);
+  } else {
+    navigateTo('dashboard-page', false);
+  }
+
+  // Connect live to FastAPI if available
   syncWithBackend(false);
 });

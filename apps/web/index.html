@@ -4,17 +4,143 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Rentory - Inventory & Rental Management</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=2.2">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="app-container">
+  <!-- DESKTOP TOP BAR / SCREEN JUMP CONTROLLER -->
+  <header class="desktop-screen-switcher" id="desktop-screen-switcher">
+    <div class="switcher-left">
+      <div class="app-brand-badge">
+        <div class="brand-icon-mini"><i class="ph-bold ph-stack"></i></div>
+        <span class="brand-name">Rentory</span>
+      </div>
+      <span class="live-status-pill"><span class="dot-live"></span> Live Dynamic IMS</span>
+    </div>
 
-    <!-- 1) INVENTORY PAGE (Screen 1 / Html -> Body) -->
-    <div id="inventory-page" class="page active">
+    <div class="screen-jump-chips" id="screen-jump-chips">
+      <button class="jump-chip" data-page="login-page">1. Login</button>
+      <button class="jump-chip" data-page="dashboard-page">2. Dashboard</button>
+      <button class="jump-chip active" data-page="inventory-page">3. Inventory</button>
+      <button class="jump-chip" data-page="settings-page">4. Settings</button>
+      <button class="jump-chip" data-page="add-rental-page">5. Add Rental</button>
+      <button class="jump-chip" data-page="equipment-details-page">6. Equipment Details</button>
+      <button class="jump-chip" data-page="edit-rental-page">7. Edit Rental</button>
+    </div>
+
+    <div class="switcher-right">
+      <button class="view-mode-toggle active" id="btn-view-phone" title="Single Device Interactive View">
+        <i class="ph ph-device-mobile"></i> Phone View
+      </button>
+      <button class="view-mode-toggle" id="btn-view-showcase" title="Show all 7 screens side-by-side like Figma">
+        <i class="ph ph-grid-four"></i> 7 Screens Showcase
+      </button>
+    </div>
+  </header>
+
+  <main class="viewport-wrapper">
+    <div class="app-container" id="app-container">
+
+      <!-- 0) LOGIN / SIGN UP PAGE (Screen 1 / Html -> Body) -->
+      <div id="login-page" class="page">
+        <div class="status-bar">
+          <span class="time" id="status-time-login">9:41</span>
+          <div class="notch-pill"></div>
+          <div class="status-icons">
+            <i class="ph-fill ph-cell-signal-full"></i>
+            <i class="ph-fill ph-wifi-high"></i>
+            <i class="ph-fill ph-battery-full"></i>
+          </div>
+        </div>
+
+        <div class="content-scroll login-scroll">
+          <div class="login-brand-header">
+            <div class="logo">
+              <div class="logo-icon">
+                <i class="ph ph-stack"></i>
+              </div>
+              <h2>Rentory</h2>
+            </div>
+            <div class="terminal-badge">
+              <span class="terminal-dot"></span>
+              <span>Terminal 07</span>
+            </div>
+          </div>
+
+          <div class="login-welcome-section">
+            <h1 class="login-title" id="login-heading">Welcome back</h1>
+            <p class="login-subtitle" id="login-subheading">Rentory Inventory & Equipment Terminal</p>
+          </div>
+
+          <!-- Log In / Sign Up Tab Toggle -->
+          <div class="auth-tabs-container">
+            <button class="auth-tab active" id="tab-login-btn">Log In</button>
+            <button class="auth-tab" id="tab-signup-btn">Sign Up</button>
+          </div>
+
+          <!-- Login Form -->
+          <form id="auth-form" class="auth-form" onsubmit="return false;">
+            <div class="form-group">
+              <label class="form-label" for="login-email">Work Email</label>
+              <div class="input-wrap">
+                <input type="email" id="login-email" class="form-input" value="name@rentory.supply" placeholder="name@rentory.supply" required>
+              </div>
+            </div>
+
+            <div class="form-group mt-3">
+              <label class="form-label" for="login-password">Password</label>
+              <div class="input-wrap with-trailing-icon">
+                <input type="password" id="login-password" class="form-input" value="password123" placeholder="••••••••••••" required>
+                <button type="button" class="btn-toggle-password" id="btn-toggle-pwd" title="Toggle password visibility">
+                  <i class="ph ph-eye" id="icon-pwd-eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="auth-options-row mt-3">
+              <label class="remember-checkbox-label">
+                <input type="checkbox" id="auth-remember-me" checked>
+                <span class="checkbox-custom"></span>
+                <span>Remember me</span>
+              </label>
+              <a href="#" class="forgot-pwd-link" id="btn-forgot-password">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn-primary-green auth-submit-btn mt-4" id="btn-submit-auth">
+              <span id="auth-btn-text">Log In to Inventory &rarr;</span>
+            </button>
+
+            <div class="auth-divider-row mt-4">
+              <span class="auth-divider-line"></span>
+              <span class="auth-divider-text">OR ACCESS WITH</span>
+              <span class="auth-divider-line"></span>
+            </div>
+
+            <div class="auth-social-row mt-3">
+              <button type="button" class="social-btn" id="sso-google" title="Log in with Google Workspace">
+                <i class="ph ph-google-logo"></i>
+              </button>
+              <button type="button" class="social-btn" id="sso-apple" title="Log in with Apple / Touch ID">
+                <i class="ph ph-fingerprint"></i>
+              </button>
+              <button type="button" class="social-btn" id="sso-key" title="Fast NFC / Keycard Dispatch">
+                <i class="ph ph-key"></i>
+              </button>
+            </div>
+
+            <div class="auth-footer-badge mt-6">
+              <i class="ph ph-lock-key"></i>
+              <span>Secure warehouse & fleet ledger</span>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- 1) INVENTORY PAGE (Screen 1 / Html -> Body) -->
+      <div id="inventory-page" class="page active">
       <div class="status-bar">
         <span class="time" id="status-time-inv">9:41</span>
         <div class="notch-pill"></div>
@@ -729,8 +855,25 @@
         </div>
       </div>
     </div>
-
   </div>
-  <script src="script.js"></script>
+
+  <!-- PANORAMIC 7 SCREENS SHOWCASE (Figma Panoramic Canvas Mode) -->
+  <div class="panoramic-showcase" id="panoramic-showcase" style="display: none;">
+      <div class="showcase-header-bar">
+        <div>
+          <h2 class="showcase-title">Rentory Design System &amp; Screen Flows</h2>
+          <p class="showcase-subtitle">Interactive overview of all 7 mobile flows. Click any screen to focus and operate.</p>
+        </div>
+        <button class="pill-btn-primary" id="btn-return-phone-view">
+          <i class="ph ph-arrow-left"></i> Return to Interactive Phone
+        </button>
+      </div>
+      <div class="showcase-screens-track" id="showcase-screens-track">
+        <!-- Dynamically rendered 7 screens side-by-side -->
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js?v=2.3"></script>
 </body>
 </html>
