@@ -30,7 +30,7 @@ Rentory is a modern, full-stack inventory and equipment rental dispatch manageme
   - Floating action button (FAB) for fast rental creation on the warehouse floor.
 
 ### ⚙️ Backend API & Infrastructure (`apps/api` & `infrastructure`)
-- **FastAPI Backend (Planned/Scaffolded)**: Domain-driven design structure (`core`, `domains`, `workers`, `shared`).
+- **FastAPI Backend**: Domain-driven API for dashboard, inventory, rentals, and account synchronisation.
 - **Database Migrations**: Alembic configuration for automated schema evolution.
 - **Docker Compose**: Containerized setup for local development with PostgreSQL and Redis.
 
@@ -155,6 +155,15 @@ npm run api
 python apps/api/src/main.py
 ```
 API runs on `http://localhost:8000`. You can also explore the interactive Swagger documentation at `http://localhost:8000/docs`.
+
+The web dashboard and mobile dashboard, inventory, and rental screens use this API. Set
+`EXPO_PUBLIC_API_URL` in `apps/mobile/.env` when running on a physical device; use the
+computer's LAN address instead of `localhost`.
+
+Firebase Email/Password authentication is configured in the mobile client. The backend
+currently synchronises the authenticated email but does not verify Firebase ID tokens
+server-side; production deployments must add Firebase Admin credentials and enforce
+Bearer-token verification before exposing write endpoints.
 
 ---
 
